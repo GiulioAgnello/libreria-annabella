@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+/* ============================================================
+   La Libreria di Annabella — sistema di design
+   Avorio, inchiostro, verde bosco, glicine.
+   ============================================================ */
+
+@theme {
+  --color-carta: #fcf9f3;
+  --color-carta-2: #f7f3ec;
+  --color-superficie: #fdfbf6;
+  --color-inchiostro: #1c1917;
+  --color-inchiostro-2: #57534e;
+  --color-inchiostro-3: #a8a29e;
+  --color-tratto: #e7e1d8;
+  --color-bosco: #3f5e4e;
+  --color-bosco-scuro: #2f4a3b;
+  --color-bosco-tenue: #eaf0ec;
+  --color-glicine: #c9a0dc;
+  --color-glicine-fondo: #8b5ca8;
+  --color-glicine-scuro: #6e4488;
+  --color-glicine-tenue: #f5edfa;
+  --color-vermiglio: #d2402f;
+  --color-oro: #b08d57;
+  --font-mincho: var(--font-shippori), "Iowan Old Style", Georgia, serif;
+  --font-gothic: var(--font-zen), -apple-system, "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --accento: #3f5e4e;
+  --accento-scuro: #2f4a3b;
+  --accento-tenue: #eaf0ec;
+}
+
+[data-area="vendita"] {
+  --accento: #8b5ca8;
+  --accento-scuro: #6e4488;
+  --accento-tenue: #f5edfa;
+}
+
+html, body {
+  background: #fcf9f3;
+  color: #1c1917;
+  font-family: var(--font-gothic);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-mincho);
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  line-height: 1.3;
+}
+
+.tessera {
+  background: rgb(253 251 246 / 0.86);
+  border: 1px solid #e7e1d8;
+  border-radius: 10px;
+}
+
+.numero { font-family: var(--font-mincho); font-variant-numeric: tabular-nums; }
+::selection { background: var(--accento-tenue); }
+:focus-visible { outline: 2px solid var(--accento); outline-offset: 2px; }
