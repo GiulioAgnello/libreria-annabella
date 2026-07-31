@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { AREE, type Area } from "@/lib/aree";
 import { clientBrowser } from "@/lib/supabase/client";
 import ScannerISBN from "@/components/ScannerISBN";
@@ -287,10 +288,12 @@ export default function ModuloAggiungi() {
 
       <div className="flex gap-4">
         {dati.copertinaUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={dati.copertinaUrl}
             alt=""
+            width={88}
+            height={132}
+            unoptimized
             className="h-[132px] w-[88px] shrink-0 rounded-[6px] border border-tratto object-cover"
           />
         )}

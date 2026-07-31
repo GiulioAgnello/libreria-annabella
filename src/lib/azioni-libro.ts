@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { clientServer } from "@/lib/supabase/server";
+import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 
 export type LibroCompleto = {
   id: string;
@@ -45,13 +45,13 @@ export type LibroCompleto = {
 
 /** Recupera un libro (di qualunque area) di proprietà dell'utente collegato. */
 export async function dettaglioLibro(id: string): Promise<LibroCompleto | null> {
+  const utente = await utenteCorrente();
+  if (!utente) return null;
+
   const supabase = await clientServer();
   if (!supabase) return null;
 
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return null;
-
-  const { data } = await supabase.from("books").select("*").eq("id", id).eq("utente", utente.user.id).single();
+  const { data } = await supabase.from("books").select("*").eq("id", id).eq("utente", utente.id).single();
 
   return (data as LibroCompleto) ?? null;
 }

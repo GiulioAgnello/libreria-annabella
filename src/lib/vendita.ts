@@ -1,4 +1,4 @@
-import { clientServer } from "@/lib/supabase/server";
+import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 import type { Libro } from "@/lib/libri";
 
 const CAMPI =
@@ -14,14 +14,15 @@ export type LibroVendita = Libro & {
 };
 
 async function utenteELibri() {
+  const utente = await utenteCorrente();
+  if (!utente) return null;
+
   const supabase = await clientServer();
   if (!supabase) return null;
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return null;
 
-  const { data } = await supabase.from("books").select(CAMPI).eq("utente", utente.user.id).eq("area", "vendita");
+  const { data } = await supabase.from("books").select(CAMPI).eq("utente", utente.id).eq("area", "vendita");
 
-  return { supabase, utenteId: utente.user.id, libri: (data ?? []) as unknown as LibroVendita[] };
+  return { supabase, utenteId: utente.id, libri: (data ?? []) as unknown as LibroVendita[] };
 }
 
 /** I numeri del cruscotto compravendita: utile, incassato, ricarico, valore del magazzino. */

@@ -3,6 +3,7 @@ import { AREE, type Area } from "@/lib/aree";
 import Icona from "@/components/Icona";
 import Sfondo from "@/components/Sfondo";
 import VoceNav from "@/components/VoceNav";
+import BottoneIndietro from "@/components/BottoneIndietro";
 
 /** Barra laterale su computer, barra in basso su telefono. Il colore cambia con l'area. */
 export default function GuscioArea({ area, children }: { area: Area; children: React.ReactNode }) {
@@ -27,9 +28,7 @@ export default function GuscioArea({ area, children }: { area: Area; children: R
         className="sticky top-0 hidden h-dvh w-[236px] shrink-0 flex-col gap-5 border-r border-tratto p-3.5 md:flex"
         style={{ backgroundColor: tintaLato }}
       >
-        <Link href="/" className="rounded-md px-2 py-1 text-[12.5px] text-inchiostro-3 hover:bg-black/5">
-          ← Ingresso
-        </Link>
+        <BottoneIndietro href="/" testo="Ingresso" className="self-start" />
 
         <div className="px-2">
           <div className="font-mincho text-[17.5px] font-semibold leading-tight">{dati.nome}</div>
@@ -70,6 +69,16 @@ export default function GuscioArea({ area, children }: { area: Area; children: R
         className="min-w-0 flex-1 px-4 pb-24 pt-5 md:px-9 md:pb-16 md:pt-7"
         style={{ backgroundColor: velo }}
       >
+        <div className="mb-4 flex items-center justify-between gap-3 md:hidden">
+          <BottoneIndietro href="/" testo="Ingresso" />
+          <Link
+            href={`/${altra}`}
+            className="inline-flex items-center gap-1.5 rounded-[9px] border border-tratto bg-superficie px-3 py-1.5 text-[12.5px] text-inchiostro-2 transition hover:border-inchiostro-3"
+          >
+            <span className="size-2 shrink-0 rounded-full" style={{ background: AREE[altra].colore }} />
+            <span className="hidden sm:inline">{AREE[altra].nome}</span>
+          </Link>
+        </div>
         {children}
       </main>
 

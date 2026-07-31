@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
 import SelezionaStato from "@/components/SelezionaStato";
@@ -85,10 +86,15 @@ export default async function Pagina({
           {libri.map((l) => (
             <div key={l.id} className="tessera flex flex-col overflow-hidden">
               <Link href={`/libro/${l.id}`} className="flex flex-1 flex-col">
-                <div className="flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
+                <div className="relative flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
                   {l.copertina_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={l.copertina_url} alt="" className="h-full w-full object-cover" />
+                    <Image
+                      src={l.copertina_url}
+                      alt=""
+                      fill
+                      sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                      className="object-cover"
+                    />
                   ) : (
                     <span className="font-mincho text-[13px] text-glicine-fondo">senza copertina</span>
                   )}
@@ -107,34 +113,36 @@ export default async function Pagina({
         </div>
       ) : (
         <div className="tessera overflow-hidden">
-          <table className="w-full text-[13.5px]">
-            <thead>
-              <tr className="border-b border-tratto text-left text-[11.5px] uppercase tracking-[0.06em] text-inchiostro-3">
-                <th className="px-4 py-2.5 font-medium">Titolo</th>
-                <th className="px-4 py-2.5 font-medium">Autore</th>
-                <th className="px-4 py-2.5 font-medium">Pagato</th>
-                <th className="px-4 py-2.5 font-medium">Risparmio</th>
-                <th className="px-4 py-2.5 font-medium">Stato</th>
-              </tr>
-            </thead>
-            <tbody>
-              {libri.map((l) => (
-                <tr key={l.id} className="border-b border-tratto last:border-0">
-                  <td className="px-4 py-2.5">
-                    <Link href={`/libro/${l.id}`} className="hover:underline">
-                      {l.titolo}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-2.5 text-inchiostro-2">{l.autori.join(", ") || "—"}</td>
-                  <td className="px-4 py-2.5 text-inchiostro-2">{EURO(l.prezzo_pagato)}</td>
-                  <td className="px-4 py-2.5 text-inchiostro-2">{EURO(l.risparmio)}</td>
-                  <td className="px-4 py-2.5">
-                    <SelezionaStato id={l.id} attuale={l.stato_lettura} azione={segnaStatoLettura} />
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] text-[13.5px]">
+              <thead>
+                <tr className="border-b border-tratto text-left text-[11.5px] uppercase tracking-[0.06em] text-inchiostro-3">
+                  <th className="px-4 py-2.5 font-medium">Titolo</th>
+                  <th className="px-4 py-2.5 font-medium">Autore</th>
+                  <th className="px-4 py-2.5 font-medium">Pagato</th>
+                  <th className="px-4 py-2.5 font-medium">Risparmio</th>
+                  <th className="px-4 py-2.5 font-medium">Stato</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {libri.map((l) => (
+                  <tr key={l.id} className="border-b border-tratto last:border-0">
+                    <td className="whitespace-nowrap px-4 py-2.5">
+                      <Link href={`/libro/${l.id}`} className="hover:underline">
+                        {l.titolo}
+                      </Link>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-inchiostro-2">{l.autori.join(", ") || "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-inchiostro-2">{EURO(l.prezzo_pagato)}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5 text-inchiostro-2">{EURO(l.risparmio)}</td>
+                    <td className="whitespace-nowrap px-4 py-2.5">
+                      <SelezionaStato id={l.id} attuale={l.stato_lettura} azione={segnaStatoLettura} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </>

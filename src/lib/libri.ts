@@ -1,4 +1,4 @@
-import { clientServer } from "@/lib/supabase/server";
+import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 
 export type Libro = {
   id: string;
@@ -46,16 +46,16 @@ export async function statisticheLibreria() {
     inCorso: [] as Libro[],
   };
 
+  const utente = await utenteCorrente();
+  if (!utente) return vuoto;
+
   const supabase = await clientServer();
   if (!supabase) return vuoto;
-
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return vuoto;
 
   const { data } = await supabase
     .from("books")
     .select(CAMPI)
-    .eq("utente", utente.user.id)
+    .eq("utente", utente.id)
     .eq("area", "personale");
 
   const libri = (data ?? []) as unknown as Libro[];
@@ -85,13 +85,13 @@ export async function statisticheLibreria() {
 
 /** Il catalogo completo dell'area personale, con ricerca testo e filtro per stato di lettura. */
 export async function catalogoLibreria(filtri: { ricerca?: string; statoLettura?: string }) {
+  const utente = await utenteCorrente();
+  if (!utente) return [];
+
   const supabase = await clientServer();
   if (!supabase) return [];
 
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return [];
-
-  let query = supabase.from("books").select(CAMPI).eq("utente", utente.user.id).eq("area", "personale");
+  let query = supabase.from("books").select(CAMPI).eq("utente", utente.id).eq("area", "personale");
 
   if (filtri.statoLettura) {
     query = query.eq("stato_lettura", filtri.statoLettura);
@@ -106,16 +106,16 @@ export async function catalogoLibreria(filtri: { ricerca?: string; statoLettura?
 
 /** La coda "da leggere", in ordine di priorità. */
 export async function codaLettura() {
+  const utente = await utenteCorrente();
+  if (!utente) return [];
+
   const supabase = await clientServer();
   if (!supabase) return [];
-
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return [];
 
   const { data } = await supabase
     .from("books")
     .select(CAMPI)
-    .eq("utente", utente.user.id)
+    .eq("utente", utente.id)
     .eq("area", "personale")
     .eq("stato_lettura", "da leggere")
     .order("posizione_coda", { ascending: true });

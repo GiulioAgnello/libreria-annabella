@@ -47,6 +47,7 @@ export const ICONE: Record<string, string> = {
   globo: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 3 2.5 15 0 18M12 3c-2.5 3-2.5 15 0 18"/>',
   piu: '<path d="M12 5v14M5 12h14"/>',
   su: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  sinistra: '<path d="M19 12H5M12 19l-7-7 7-7"/>',
   giu: '<path d="M12 5v14M5 12l7 7 7-7"/>',
   ingranaggio: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
 };

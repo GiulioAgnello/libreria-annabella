@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Marchio from "@/components/Marchio";
 import Sfondo from "@/components/Sfondo";
 import { clientPubblico } from "@/lib/supabase/pubblico";
@@ -51,10 +52,15 @@ export default async function Vetrina() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {copie.map((c) => (
             <div key={c.id} className="tessera flex flex-col overflow-hidden">
-              <div className="flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
+              <div className="relative flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
                 {c.copertina_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={c.copertina_url} alt="" className="h-full w-full object-cover" />
+                  <Image
+                    src={c.copertina_url}
+                    alt=""
+                    fill
+                    sizes="(min-width: 768px) 25vw, (min-width: 640px) 33vw, 50vw"
+                    className="object-cover"
+                  />
                 ) : (
                   <span className="font-mincho text-[13px] text-glicine-fondo">senza copertina</span>
                 )}

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import Image from "next/image";
 import PaginaSemplice from "@/components/PaginaSemplice";
 import BottoneElimina from "@/components/BottoneElimina";
+import BottoneIndietro from "@/components/BottoneIndietro";
 import { dettaglioLibro, aggiornaLibro, cancellaLibro } from "@/lib/azioni-libro";
 
 const CAMPO =
@@ -28,10 +29,12 @@ export default async function Pagina({
 
   return (
     <PaginaSemplice titolo={libro.titolo} sottotitolo="Modifica le caratteristiche di questa copia.">
-      <p className="mb-4 text-[13px] text-inchiostro-3">
-        <span style={{ color: areaColore }}>{libro.area === "personale" ? "La mia libreria" : "Compravendita"}</span>{" "}
-        — <Link href={torna} className="underline hover:text-inchiostro-2">torna all&apos;elenco</Link>
-      </p>
+      <div className="mb-4 flex flex-wrap items-center gap-2.5">
+        <span className="text-[13px]" style={{ color: areaColore }}>
+          {libro.area === "personale" ? "La mia libreria" : "Compravendita"}
+        </span>
+        <BottoneIndietro href={torna} testo="Torna all'elenco" />
+      </div>
 
       {salvato && (
         <p className="tessera mb-4 px-4 py-3 text-[13px] text-bosco">Modifiche salvate.</p>
@@ -40,10 +43,11 @@ export default async function Pagina({
       <form action={salvaLibro} className="space-y-5">
         <div className="flex gap-4">
           {libro.copertina_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={libro.copertina_url}
               alt=""
+              width={88}
+              height={132}
               className="h-[132px] w-[88px] shrink-0 rounded-[6px] border border-tratto object-cover"
             />
           )}
