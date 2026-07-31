@@ -17,5 +17,5 @@ export async function GET(richiesta: Request) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/entra?errore=accesso`);
+  return NextResponse.redirect(`${origin}/?errore=accesso`);
 }

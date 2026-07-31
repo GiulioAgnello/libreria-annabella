@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Marchio from "@/components/Marchio";
 import Sfondo from "@/components/Sfondo";
+import ModuloAccesso from "@/components/ModuloAccesso";
 import { AREE, type Area } from "@/lib/aree";
+import { utenteCorrente } from "@/lib/supabase/server";
+import { SUPABASE_CONFIGURATO } from "@/lib/supabase/config";
 
 const SCORCIATOIE = [
   { href: "/aggiungi", testo: "Aggiungi un libro" },
@@ -9,8 +12,28 @@ const SCORCIATOIE = [
   { href: "/impostazioni", testo: "Impostazioni" },
 ];
 
-/** L'ingresso: due porte, nient'altro. */
-export default function Ingresso() {
+export default async function Ingresso() {
+  const utente = SUPABASE_CONFIGURATO ? await utenteCorrente() : null;
+
+  // Prima di ogni altra cosa: se non sei collegato, l'unica cosa che vedi è l'accesso.
+  if (SUPABASE_CONFIGURATO && !utente) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center px-4 py-8">
+        <Sfondo forte />
+        <div className="tessera w-full max-w-[400px] rounded-[2px] px-6 py-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <Marchio dimensione={28} />
+          </div>
+          <h1 className="text-[22px]">La Libreria di Annabella</h1>
+          <p className="mt-2 text-[13.5px] text-inchiostro-2">
+            Inserisci la tua email: ti arriverà un collegamento per entrare.
+          </p>
+          <ModuloAccesso />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-dvh items-center justify-center px-3 py-5">
       <Sfondo forte />

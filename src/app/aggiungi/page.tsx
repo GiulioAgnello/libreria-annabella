@@ -5,7 +5,7 @@ import ModuloAggiungi from "./ModuloAggiungi";
 
 export default async function Aggiungi() {
   const utente = await utenteCorrente();
-  if (!utente) redirect("/entra");
+  if (!utente) redirect("/");
 
   return (
     <PaginaSemplice titolo="Aggiungi un libro" sottotitolo="Inquadra il codice a barre. Il resto si scrive da sé.">
