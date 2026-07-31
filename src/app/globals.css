@@ -10,8 +10,8 @@
   --color-carta-2: #f7f3ec;
   --color-superficie: #fdfbf6;
   --color-inchiostro: #1c1917;
-  --color-inchiostro-2: #57534e;
-  --color-inchiostro-3: #a8a29e;
+  --color-inchiostro-2: #4a4642;
+  --color-inchiostro-3: #82786f;
   --color-tratto: #e7e1d8;
   --color-bosco: #3f5e4e;
   --color-bosco-scuro: #2f4a3b;
@@ -43,6 +43,7 @@ html, body {
   background: #fcf9f3;
   color: #1c1917;
   font-family: var(--font-gothic);
+  font-weight: 500;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -54,11 +55,11 @@ h1, h2, h3, h4 {
 }
 
 .tessera {
-  background: rgb(253 251 246 / 0.86);
+  background: rgb(253 251 246 / 0.94);
   border: 1px solid #e7e1d8;
   border-radius: 10px;
 }
 
-.numero { font-family: var(--font-mincho); font-variant-numeric: tabular-nums; }
+.numero { font-family: var(--font-mincho); font-weight: 600; font-variant-numeric: tabular-nums; }
 ::selection { background: var(--accento-tenue); }
 :focus-visible { outline: 2px solid var(--accento); outline-offset: 2px; }

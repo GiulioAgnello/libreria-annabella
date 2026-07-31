@@ -84,21 +84,23 @@ export default async function Pagina({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {libri.map((l) => (
             <div key={l.id} className="tessera flex flex-col overflow-hidden">
-              <div className="flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
-                {l.copertina_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={l.copertina_url} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <span className="font-mincho text-[13px] text-glicine-fondo">senza copertina</span>
-                )}
-              </div>
-              <div className="flex flex-1 flex-col gap-1.5 px-3 py-3">
-                <div className="line-clamp-2 text-[13.5px] leading-snug">{l.titolo}</div>
-                {l.autori[0] && <div className="text-[12px] text-inchiostro-3">{l.autori[0]}</div>}
-                <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-                  <span className="text-[12px] text-inchiostro-3">{EURO(l.risparmio)}</span>
-                  <SelezionaStato id={l.id} attuale={l.stato_lettura} azione={segnaStatoLettura} />
+              <Link href={`/libro/${l.id}`} className="flex flex-1 flex-col">
+                <div className="flex aspect-[2/3] items-center justify-center bg-glicine-tenue">
+                  {l.copertina_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={l.copertina_url} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="font-mincho text-[13px] text-glicine-fondo">senza copertina</span>
+                  )}
                 </div>
+                <div className="px-3 pt-3">
+                  <div className="line-clamp-2 text-[13.5px] leading-snug hover:underline">{l.titolo}</div>
+                  {l.autori[0] && <div className="text-[12px] text-inchiostro-3">{l.autori[0]}</div>}
+                </div>
+              </Link>
+              <div className="mt-auto flex items-center justify-between gap-2 px-3 pb-3 pt-2">
+                <span className="text-[12px] text-inchiostro-3">{EURO(l.risparmio)}</span>
+                <SelezionaStato id={l.id} attuale={l.stato_lettura} azione={segnaStatoLettura} />
               </div>
             </div>
           ))}
@@ -118,7 +120,11 @@ export default async function Pagina({
             <tbody>
               {libri.map((l) => (
                 <tr key={l.id} className="border-b border-tratto last:border-0">
-                  <td className="px-4 py-2.5">{l.titolo}</td>
+                  <td className="px-4 py-2.5">
+                    <Link href={`/libro/${l.id}`} className="hover:underline">
+                      {l.titolo}
+                    </Link>
+                  </td>
                   <td className="px-4 py-2.5 text-inchiostro-2">{l.autori.join(", ") || "—"}</td>
                   <td className="px-4 py-2.5 text-inchiostro-2">{EURO(l.prezzo_pagato)}</td>
                   <td className="px-4 py-2.5 text-inchiostro-2">{EURO(l.risparmio)}</td>

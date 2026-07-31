@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
 import Icona from "@/components/Icona";
@@ -29,7 +30,9 @@ export default async function Pagina() {
             <span className="numero w-6 shrink-0 text-center text-[15px] text-inchiostro-3">{i + 1}</span>
 
             <div className="min-w-0 flex-1">
-              <div className="truncate text-[14.5px]">{l.titolo}</div>
+              <Link href={`/libro/${l.id}`} className="block truncate text-[14.5px] hover:underline">
+                {l.titolo}
+              </Link>
               {l.autori[0] && <div className="truncate text-[12.5px] text-inchiostro-3">{l.autori[0]}</div>}
             </div>
 
