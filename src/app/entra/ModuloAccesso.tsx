@@ -16,12 +16,25 @@ export default function ModuloAccesso() {
     setStato("invio");
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Solo chi ha già un account (creato a mano da Supabase) può entrare:
+        // niente iscrizioni libere da chiunque trovi il sito.
+        shouldCreateUser: false,
+      },
     });
 
     if (error) {
+      // Se l'indirizzo non ha un account, Supabase risponde con un errore
+      // esplicito ("signups not allowed for otp"). Non lo mostriamo mai:
+      // altrimenti chiunque potrebbe scoprire, provando indirizzi a caso,
+      // quali email hanno un account su questa applicazione.
+      if (error.message.toLowerCase().includes("signup")) {
+        setStato("fatto");
+        return;
+      }
       setStato("errore");
-      setMessaggio(error.message);
+      setMessaggio("Qualcosa non ha funzionato. Riprova fra un momento.");
     } else {
       setStato("fatto");
     }
