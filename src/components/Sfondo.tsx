@@ -7,7 +7,7 @@ export default function Sfondo({ forte = false }: { forte?: boolean }) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed inset-0 -z-10 bg-cover bg-top bg-no-repeat"
+      className="pointer-events-none fixed inset-0 bg-cover bg-top bg-no-repeat"
       style={{ backgroundImage: "url(/sfondo.svg)", opacity: forte ? 0.55 : 0.3 }}
     />
   );

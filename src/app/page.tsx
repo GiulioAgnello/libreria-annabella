@@ -5,6 +5,8 @@ import ModuloAccesso from "@/components/ModuloAccesso";
 import { AREE, type Area } from "@/lib/aree";
 import { utenteCorrente } from "@/lib/supabase/server";
 import { SUPABASE_CONFIGURATO } from "@/lib/supabase/config";
+import { statisticheLibreria } from "@/lib/libri";
+import { statisticheVendita } from "@/lib/vendita";
 
 const SCORCIATOIE = [
   { href: "/aggiungi", testo: "Aggiungi un libro" },
@@ -33,6 +35,12 @@ export default async function Ingresso() {
       </main>
     );
   }
+
+  const [statLibreria, statVendita] = await Promise.all([statisticheLibreria(), statisticheVendita()]);
+  const CONTEGGI: Record<Area, number> = {
+    libreria: statLibreria.totale,
+    vendita: statVendita.inMagazzino + statVendita.vendute,
+  };
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-3 py-5">
@@ -65,7 +73,7 @@ export default async function Ingresso() {
                 </p>
                 <span className="mt-3.5 flex flex-col items-center gap-0.5 border-t border-tratto pt-2.5 sm:mt-5 sm:flex-row sm:justify-center sm:gap-2 sm:pt-4">
                   <b className="numero text-[20px] font-normal sm:text-[24px]" style={{ color: area.colore }}>
-                    0
+                    {CONTEGGI[chiave]}
                   </b>
                   <span className="text-[9px] uppercase tracking-[0.14em] text-inchiostro-3 sm:text-[10px]">
                     libri inseriti
