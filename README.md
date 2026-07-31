@@ -130,7 +130,7 @@ al 50% sull'ingresso.
 
 - [x] **Fase 0** — progetto, build, deploy
 - [x] **Fase 1** — schema del database, accesso, ingresso a due porte, guscio delle aree
-- [ ] **Fase 2** — aggiungi libro: scanner ISBN, compilazione automatica, scheda
+- [x] **Fase 2** — aggiungi libro: scanner ISBN, compilazione automatica, scheda
 - [ ] **Fase 3** — importazione di `LIBRERIA.xlsx`
 - [ ] **Fase 4** — area personale: catalogo, filtri, coda, risparmio
 - [ ] **Fase 5** — area compravendita: magazzino, vendite, contabilità
