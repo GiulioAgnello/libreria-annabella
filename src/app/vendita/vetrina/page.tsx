@@ -1,11 +1,6 @@
-import Intestazione from "@/components/Intestazione";
-import Vuoto from "@/components/Vuoto";
+import { redirect } from "next/navigation";
 
+/** La vetrina vive fuori dal guscio privato: qui restava solo un vecchio collegamento. */
 export default function Pagina() {
-  return (
-    <>
-      <Intestazione titolo="Vetrina pubblica" sottotitolo="Si vede solo ciò che decidi di mostrare." />
-      <Vuoto titolo="Vetrina non ancora aperta" testo="Sceglierai copia per copia che cosa mostrare. Prezzi d'acquisto, margini e note restano privati." fase="Fase 6" />
-    </>
-  );
+  redirect("/vetrina");
 }

@@ -5,7 +5,7 @@ import { AREE, type Area } from "@/lib/aree";
 
 const SCORCIATOIE = [
   { href: "/aggiungi", testo: "Aggiungi un libro" },
-  { href: "/vendita/vetrina", testo: "Vetrina" },
+  { href: "/vetrina", testo: "Vetrina" },
   { href: "/impostazioni", testo: "Impostazioni" },
 ];
 

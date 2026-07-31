@@ -1,7 +1,8 @@
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
+import TogglePubblico from "@/components/TogglePubblico";
 import { magazzinoVendita } from "@/lib/vendita";
-import { segnaVenduta } from "@/lib/azioni-vendita";
+import { segnaVenduta, segnaPubblico } from "@/lib/azioni-vendita";
 
 const EURO = (n: number | null) => (n == null ? "—" : n.toLocaleString("it-IT", { style: "currency", currency: "EUR" }));
 
@@ -24,6 +25,7 @@ export default async function Pagina() {
                 <th className="px-4 py-2.5 font-medium">Richiesto</th>
                 <th className="px-4 py-2.5 font-medium">Margine atteso</th>
                 <th className="px-4 py-2.5 font-medium">Giacenza</th>
+                <th className="px-4 py-2.5 font-medium">Vetrina</th>
                 <th className="px-4 py-2.5 font-medium">Vendita</th>
               </tr>
             </thead>
@@ -39,6 +41,9 @@ export default async function Pagina() {
                   <td className="px-4 py-2.5 text-inchiostro-2">{EURO(l.margineAtteso)}</td>
                   <td className="px-4 py-2.5 text-inchiostro-2">
                     {l.giorniGiacenza != null ? `${l.giorniGiacenza} gg` : "—"}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <TogglePubblico id={l.id} attuale={l.pubblico} azione={segnaPubblico} />
                   </td>
                   <td className="px-4 py-2.5">
                     <form action={segnaVenduta.bind(null, l.id)} className="flex items-center gap-1.5">

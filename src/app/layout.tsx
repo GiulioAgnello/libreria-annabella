@@ -19,6 +19,15 @@ const gothic = Zen_Kaku_Gothic_New({
 export const metadata: Metadata = {
   title: "La Libreria di Annabella",
   description: "Catalogo personale e compravendita di libri usati",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Libreria",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {

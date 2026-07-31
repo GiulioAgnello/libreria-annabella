@@ -31,7 +31,7 @@ export const AREE: Record<
       { href: "/vendita/magazzino", etichetta: "Magazzino", icona: "borsa" },
       { href: "/vendita/vendite", etichetta: "Vendite", icona: "grafico" },
       { href: "/vendita/contabilita", etichetta: "Contabilità", icona: "barre" },
-      { href: "/vendita/vetrina", etichetta: "Vetrina", icona: "globo" },
+      { href: "/vetrina", etichetta: "Vetrina", icona: "globo" },
     ],
   },
 };
