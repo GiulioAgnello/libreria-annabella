@@ -47,6 +47,56 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ============================================================
+   Comportamento su telefono
+   ============================================================ */
+
+/*
+ * Niente scorrimento laterale. Se una tabella o un titolo lunghissimo
+ * sfonda, viene tagliato invece di allargare tutta la pagina — è quello
+ * che faceva sembrare l'app "storta" da telefono.
+ * `clip` e non `hidden`: `hidden` romperebbe la barra laterale sticky.
+ */
+html {
+  overflow-x: clip;
+}
+
+/*
+ * La ragione vera per cui la pagina "si allargava sempre".
+ *
+ * Safari su iPhone ingrandisce automaticamente quando l'utente tocca un
+ * campo di testo il cui carattere è sotto i 16 pixel — e poi non torna
+ * indietro da solo. I campi qui sono a 14px e 12,5px, quindi succedeva a
+ * ogni ricerca nel catalogo e a ogni prezzo digitato nel magazzino.
+ *
+ * La soluzione che gira in rete è `maximum-scale=1`, ma è sbagliata: toglie
+ * anche lo zoom con le dita, che serve a chi non ci vede bene. Meglio
+ * togliere il motivo dello zoom automatico invece della possibilità di
+ * zoomare. Solo sui dispositivi a tocco: sul computer il carattere resta
+ * quello scelto per il disegno.
+ */
+@media (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/*
+ * Su iPhone la barra di navigazione in basso finisce sotto la tacca del
+ * gesto "home". `env(safe-area-inset-bottom)` la solleva quanto basta, e
+ * sui telefoni che non ce l'hanno vale zero: nessun effetto collaterale.
+ */
+.barra-sicura {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+/* Tirando oltre il fondo non trascina la pagina sotto: sembra un'app, non un sito. */
+body {
+  overscroll-behavior-y: none;
+}
+
 h1, h2, h3, h4 {
   font-family: var(--font-mincho);
   font-weight: 400;

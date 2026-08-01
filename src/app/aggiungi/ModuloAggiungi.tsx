@@ -28,6 +28,12 @@ type Dati = {
   note: string;
   prezzoRichiesto: string;
   pubblico: boolean;
+  /* Solo area vendita: capita di registrare una copia che è già stata venduta,
+     tipicamente quando si recupera l'arretrato invece di inserire man mano. */
+  giaVenduto: boolean;
+  prezzoVendita: string;
+  dataVendita: string;
+  canaleVendita: string;
 };
 
 const OGGI = () => new Date().toISOString().slice(0, 10);
@@ -53,6 +59,10 @@ const VUOTO: Dati = {
   note: "",
   prezzoRichiesto: "",
   pubblico: false,
+  giaVenduto: false,
+  prezzoVendita: "",
+  dataVendita: "",
+  canaleVendita: "",
 };
 
 /** Chiave dell'area nell'URL → valore dell'enum nel database. */
@@ -157,6 +167,18 @@ export default function ModuloAggiungi() {
     if (areaDb === "vendita") {
       payload.prezzo_richiesto = decimale(dati.prezzoRichiesto);
       payload.pubblico = dati.pubblico;
+
+      if (dati.giaVenduto) {
+        // Copia già venduta al momento dell'inserimento: entra direttamente
+        // nello storico, senza dover passare dal magazzino per segnarla dopo.
+        payload.stato = "venduta";
+        payload.prezzo_vendita = decimale(dati.prezzoVendita);
+        payload.data_vendita = dati.dataVendita || OGGI();
+        payload.canale_vendita = dati.canaleVendita || null;
+        // Una copia venduta non ha senso in vetrina: la regola del database la
+        // escluderebbe comunque, ma tenere il dato coerente evita sorprese.
+        payload.pubblico = false;
+      }
     } else {
       // La coda di lettura è in ordine di arrivo: il nuovo libro va in fondo.
       const { count } = await supabase
@@ -444,15 +466,60 @@ export default function ModuloAggiungi() {
       </div>
 
       {area === "vendita" && (
-        <label className="flex items-center gap-2 text-[13.5px] text-inchiostro-2">
-          <input
-            type="checkbox"
-            checked={dati.pubblico}
-            onChange={(e) => aggiorna("pubblico", e.target.checked)}
-            className="size-4"
-          />
-          Mostra nella vetrina pubblica
-        </label>
+        <div className="space-y-3">
+          <label className="flex items-center gap-2 text-[13.5px] text-inchiostro-2">
+            <input
+              type="checkbox"
+              checked={dati.giaVenduto}
+              onChange={(e) => aggiorna("giaVenduto", e.target.checked)}
+              className="size-4"
+            />
+            Questa copia è già stata venduta
+          </label>
+
+          {dati.giaVenduto ? (
+            <div className="tessera grid gap-3 px-4 py-4 sm:grid-cols-3">
+              <div>
+                <label className={ETICHETTA}>Prezzo di vendita (€)</label>
+                <input
+                  value={dati.prezzoVendita}
+                  onChange={(e) => aggiorna("prezzoVendita", e.target.value)}
+                  inputMode="decimal"
+                  className={CAMPO}
+                />
+              </div>
+              <div>
+                <label className={ETICHETTA}>Data di vendita</label>
+                <input
+                  type="date"
+                  value={dati.dataVendita}
+                  onChange={(e) => aggiorna("dataVendita", e.target.value)}
+                  className={CAMPO}
+                />
+                <p className="mt-1 text-[11.5px] text-inchiostro-3">Se la lasci vuota, metto oggi.</p>
+              </div>
+              <div>
+                <label className={ETICHETTA}>Canale di vendita</label>
+                <input
+                  value={dati.canaleVendita}
+                  onChange={(e) => aggiorna("canaleVendita", e.target.value)}
+                  placeholder="Vinted, mercatino…"
+                  className={CAMPO}
+                />
+              </div>
+            </div>
+          ) : (
+            <label className="flex items-center gap-2 text-[13.5px] text-inchiostro-2">
+              <input
+                type="checkbox"
+                checked={dati.pubblico}
+                onChange={(e) => aggiorna("pubblico", e.target.checked)}
+                className="size-4"
+              />
+              Mostra nella vetrina pubblica
+            </label>
+          )}
+        </div>
       )}
 
       <div>

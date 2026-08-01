@@ -16,7 +16,11 @@ export default async function Pagina() {
         <Vuoto titolo="Nessuna vendita registrata" testo="Segna una copia come venduta dal magazzino: comparirà qui con margine e ROI già calcolati." />
       ) : (
         <div className="tessera overflow-hidden">
-          <table className="w-full text-[13.5px]">
+          {/* Sei colonne non stanno in uno schermo da telefono: senza questo
+              involucro venivano tagliate e diventavano irraggiungibili. Adesso
+              la tabella scorre di lato per conto suo, senza spostare la pagina. */}
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[560px] text-[13.5px]">
             <thead>
               <tr className="border-b border-tratto text-left text-[11.5px] uppercase tracking-[0.06em] text-inchiostro-3">
                 <th className="px-4 py-2.5 font-medium">Titolo</th>
@@ -41,8 +45,9 @@ export default async function Pagina() {
                   <td className="px-4 py-2.5 text-inchiostro-3">{l.data_vendita ?? "—"}</td>
                 </tr>
               ))}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </>

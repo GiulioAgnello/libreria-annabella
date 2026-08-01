@@ -47,6 +47,18 @@ export const viewport: Viewport = {
   themeColor: "#fcf9f3",
   width: "device-width",
   initialScale: 1,
+  /*
+   * Lo zoom con le dita resta possibile — fino a cinque volte. È una scelta
+   * deliberata: la ricetta più diffusa per impedire a iOS di ingrandire da
+   * solo è `maximum-scale=1, user-scalable=no`, ma quella toglie lo zoom a
+   * tutti, compreso chi ne ha bisogno per leggere. Lo zoom automatico l'ho
+   * disinnescato altrove, portando i campi di testo a 16px su schermo tattile
+   * (vedi globals.css): tolta la causa, il rimedio brutale non serve.
+   */
+  maximumScale: 5,
+  userScalable: true,
+  /* Lo sfondo arriva fin sotto la tacca e le barre di sistema. */
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

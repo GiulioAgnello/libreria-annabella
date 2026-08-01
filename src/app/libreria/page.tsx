@@ -2,11 +2,15 @@ import Link from "next/link";
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
 import { statisticheLibreria } from "@/lib/libri";
+import { statisticheVendita } from "@/lib/vendita";
 
 const EURO = (n: number) => n.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
 
 export default async function Pagina() {
-  const stat = await statisticheLibreria();
+  /* Le due aree si leggono in parallelo: il saldo mette a confronto quanto è
+     costata la libreria personale con quanto ha reso la compravendita. */
+  const [stat, vendita] = await Promise.all([statisticheLibreria(), statisticheVendita()]);
+  const saldo = vendita.utile - stat.speso;
 
   if (stat.totale === 0) {
     return (
@@ -43,6 +47,40 @@ export default async function Pagina() {
       <div className="tessera mb-5 px-6 py-6">
         <div className="text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">Risparmio sull&apos;usato</div>
         <div className="numero mt-1 text-[34px] text-bosco">{EURO(stat.risparmio)}</div>
+      </div>
+
+      {/* Il conto della passione: quanto sono costati i libri tenuti per leggere,
+          contro quanto ha reso rivendere gli altri. Se il saldo è positivo, il
+          banchetto dell'usato si è pagato la libreria. */}
+      <div className="tessera mb-5 px-6 py-5">
+        <div className="text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">
+          Le rivendite pagano la libreria?
+        </div>
+
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div>
+            <div className="text-[12px] text-inchiostro-3">Speso per la libreria</div>
+            <div className="numero text-[21px] text-inchiostro-2">− {EURO(stat.speso)}</div>
+          </div>
+          <div>
+            <div className="text-[12px] text-inchiostro-3">Utile delle rivendite</div>
+            <div className="numero text-[21px]" style={{ color: "#8b5ca8" }}>
+              + {EURO(vendita.utile)}
+            </div>
+          </div>
+          <div className="border-t border-tratto pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+            <div className="text-[12px] text-inchiostro-3">Saldo</div>
+            <div className={`numero text-[24px] ${saldo >= 0 ? "text-bosco" : "text-vermiglio"}`}>
+              {EURO(saldo)}
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-3 text-[12.5px] leading-relaxed text-inchiostro-3">
+          {saldo >= 0
+            ? "Sei in attivo: rivendere ha coperto tutti i libri che ti sei tenuta, e avanza pure qualcosa."
+            : `Ti mancano ${EURO(Math.abs(saldo))} perché le rivendite coprano i libri che ti sei tenuta.`}
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">

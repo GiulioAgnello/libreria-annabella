@@ -82,7 +82,7 @@ export default function GuscioArea({ area, children }: { area: Area; children: R
         {children}
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex border-t border-tratto bg-carta/95 px-1 pb-2 pt-1.5 backdrop-blur md:hidden">
+      <nav className="barra-sicura fixed inset-x-0 bottom-0 z-40 flex border-t border-tratto bg-carta/95 px-1 pt-1.5 backdrop-blur md:hidden">
         {[...dati.voci, { href: "/aggiungi", etichetta: "Aggiungi", icona: "piu" }].map((v) => (
           <VoceNav
             key={v.href}
