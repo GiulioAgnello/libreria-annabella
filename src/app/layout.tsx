@@ -16,7 +16,20 @@ const gothic = Zen_Kaku_Gothic_New({
   display: "swap",
 });
 
+/**
+ * Serve a trasformare i percorsi relativi delle immagini di anteprima in indirizzi
+ * assoluti. Senza, Next ripiega su `http://localhost:3000` e chi riceve il link
+ * condiviso vede un riquadro vuoto: l'anteprima punta a un indirizzo che esiste
+ * solo sul computer di chi l'ha generata.
+ */
+const INDIRIZZO_SITO =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "https://libreria-annabella.vercel.app");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(INDIRIZZO_SITO),
   title: "La Libreria di Annabella",
   description: "Catalogo personale e compravendita di libri usati",
   manifest: "/manifest.webmanifest",

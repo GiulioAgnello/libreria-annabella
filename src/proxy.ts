@@ -6,8 +6,11 @@ import { CHIAVE_SUPABASE, SUPABASE_CONFIGURATO, URL_SUPABASE } from "@/lib/supab
  * Rinnova la sessione ad ogni visita. Senza questo passaggio, il token di accesso
  * scade dopo un'ora e nessuno lo rinnova finché non torni a fare login — è la causa
  * più comune del "mi chiede l'accesso troppo spesso" con Supabase su Next.js.
+ *
+ * Il file si chiamava `middleware.ts`: da Next 16 la convenzione è `proxy.ts`,
+ * con la funzione rinominata di conseguenza. Il comportamento è identico.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let risposta = NextResponse.next({ request });
 
   if (!SUPABASE_CONFIGURATO) return risposta;
