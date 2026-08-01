@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { clientServer } from "@/lib/supabase/server";
+import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 
 const COLONNE = [
   "area",
@@ -49,15 +49,15 @@ export async function GET() {
     return NextResponse.json({ errore: "Database non collegato" }, { status: 503 });
   }
 
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) {
+  const utente = await utenteCorrente();
+  if (!utente) {
     return NextResponse.json({ errore: "Non sei collegato" }, { status: 401 });
   }
 
   const { data, error } = await supabase
     .from("books")
     .select(COLONNE.join(","))
-    .eq("utente", utente.user.id)
+    .eq("utente", utente.id)
     .order("area", { ascending: true })
     .order("titolo", { ascending: true });
 

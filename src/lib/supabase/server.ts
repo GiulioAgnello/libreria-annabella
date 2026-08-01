@@ -22,15 +22,31 @@ export async function clientServer() {
   });
 }
 
+export type UtenteSessione = { id: string; email: string | null };
+
 /**
  * L'utente collegato, oppure null.
- * `cache()` fa sì che, durante lo stesso caricamento di pagina, la verifica della sessione
- * (una richiesta di rete verso Supabase) avvenga una sola volta anche se più componenti
- * la richiedono — layout, pagina e helper dati altrimenti la ripeterebbero ciascuno per conto suo.
+ *
+ * Usa `getClaims()` e non `getUser()`. La differenza pesa: `getUser()` fa una vera
+ * richiesta HTTP ai server Supabase ad ogni chiamata, quindi ogni pagina aspettava
+ * un giro di rete completo prima ancora di iniziare a leggere i libri. `getClaims()`
+ * verifica la firma del token in locale con la chiave pubblica del progetto: zero rete.
+ *
+ * Richiede che il progetto Supabase usi chiavi JWT asimmetriche
+ * (Dashboard → Authentication → Signing Keys → migrare a ECC P-256).
+ * Con le vecchie chiavi simmetriche la libreria ricade da sola su una chiamata di rete:
+ * il codice resta corretto, semplicemente non guadagna velocità finché non migri.
+ *
+ * `cache()` deduplica comunque la chiamata dentro lo stesso render.
  */
-export const utenteCorrente = cache(async () => {
+export const utenteCorrente = cache(async (): Promise<UtenteSessione | null> => {
   const supabase = await clientServer();
   if (!supabase) return null;
-  const { data } = await supabase.auth.getUser();
-  return data.user ?? null;
+
+  const { data, error } = await supabase.auth.getClaims();
+  const sub = data?.claims?.sub;
+  if (error || !sub) return null;
+
+  const email = data.claims.email;
+  return { id: sub, email: typeof email === "string" ? email : null };
 });

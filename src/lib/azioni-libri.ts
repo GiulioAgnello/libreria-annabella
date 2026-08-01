@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { clientServer } from "@/lib/supabase/server";
+import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 
 const OGGI = () => new Date().toISOString().slice(0, 10);
 
@@ -26,13 +26,13 @@ export async function spostaCoda(id: string, direzione: "su" | "giu") {
   const supabase = await clientServer();
   if (!supabase) return;
 
-  const { data: utente } = await supabase.auth.getUser();
-  if (!utente.user) return;
+  const utente = await utenteCorrente();
+  if (!utente) return;
 
   const { data: lista } = await supabase
     .from("books")
     .select("id, posizione_coda")
-    .eq("utente", utente.user.id)
+    .eq("utente", utente.id)
     .eq("area", "personale")
     .eq("stato_lettura", "da leggere")
     .order("posizione_coda", { ascending: true });

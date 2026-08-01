@@ -26,10 +26,33 @@ export type Libro = {
   pubblico: boolean;
 };
 
-const CAMPI =
-  "id, isbn, titolo, sottotitolo, autori, editore, anno, copertina_url, generi, formato, condizione, " +
-  "prezzo_pagato, prezzo_copertina, risparmio, provenienza, stato_lettura, posizione_coda, voto, " +
-  "stato, prezzo_richiesto, prezzo_vendita, margine, pubblico";
+/*
+ * Ogni funzione chiede al database soltanto le colonne che la sua schermata disegna.
+ * Prima ne chiedevano tutte e ventitré ovunque: per contare i libri del cruscotto
+ * viaggiavano anche ISBN, editore, sottotitolo, generi, copertine — dati che nessuno
+ * guardava. Su una connessione di telefono è tempo di attesa regalato.
+ */
+
+/** Cruscotto: contare, sommare, e mostrare titolo e autore di pochi libri. */
+const CAMPI_SINTESI = "id, titolo, autori, stato_lettura, posizione_coda, provenienza, risparmio";
+
+/** Catalogo: quello che si vede in griglia e in tabella, niente di più. */
+const CAMPI_ELENCO = "id, titolo, autori, copertina_url, stato_lettura, prezzo_pagato, risparmio";
+
+/** Coda di lettura: numero, titolo, autore. */
+const CAMPI_CODA = "id, titolo, autori, posizione_coda";
+
+export type LibroSintesi = Pick<
+  Libro,
+  "id" | "titolo" | "autori" | "stato_lettura" | "posizione_coda" | "provenienza" | "risparmio"
+>;
+
+export type LibroElenco = Pick<
+  Libro,
+  "id" | "titolo" | "autori" | "copertina_url" | "stato_lettura" | "prezzo_pagato" | "risparmio"
+>;
+
+export type LibroCoda = Pick<Libro, "id" | "titolo" | "autori" | "posizione_coda">;
 
 /** Numeri del cruscotto dell'area personale: quanto letto, quanto risparmiato, cosa arriva dopo. */
 export async function statisticheLibreria() {
@@ -42,8 +65,8 @@ export async function statisticheLibreria() {
     prestiti: 0,
     audiolibri: 0,
     risparmio: 0,
-    prossimo: null as Libro | null,
-    inCorso: [] as Libro[],
+    prossimo: null as LibroSintesi | null,
+    inCorso: [] as LibroSintesi[],
   };
 
   const utente = await utenteCorrente();
@@ -54,11 +77,11 @@ export async function statisticheLibreria() {
 
   const { data } = await supabase
     .from("books")
-    .select(CAMPI)
+    .select(CAMPI_SINTESI)
     .eq("utente", utente.id)
     .eq("area", "personale");
 
-  const libri = (data ?? []) as unknown as Libro[];
+  const libri = (data ?? []) as unknown as LibroSintesi[];
   if (libri.length === 0) return vuoto;
 
   const risparmio = libri.reduce((somma, l) => somma + (l.risparmio ?? 0), 0);
@@ -91,7 +114,11 @@ export async function catalogoLibreria(filtri: { ricerca?: string; statoLettura?
   const supabase = await clientServer();
   if (!supabase) return [];
 
-  let query = supabase.from("books").select(CAMPI).eq("utente", utente.id).eq("area", "personale");
+  let query = supabase
+    .from("books")
+    .select(CAMPI_ELENCO)
+    .eq("utente", utente.id)
+    .eq("area", "personale");
 
   if (filtri.statoLettura) {
     query = query.eq("stato_lettura", filtri.statoLettura);
@@ -101,7 +128,7 @@ export async function catalogoLibreria(filtri: { ricerca?: string; statoLettura?
   }
 
   const { data } = await query.order("titolo", { ascending: true });
-  return (data ?? []) as unknown as Libro[];
+  return (data ?? []) as unknown as LibroElenco[];
 }
 
 /** La coda "da leggere", in ordine di priorità. */
@@ -114,11 +141,11 @@ export async function codaLettura() {
 
   const { data } = await supabase
     .from("books")
-    .select(CAMPI)
+    .select(CAMPI_CODA)
     .eq("utente", utente.id)
     .eq("area", "personale")
     .eq("stato_lettura", "da leggere")
     .order("posizione_coda", { ascending: true });
 
-  return (data ?? []) as unknown as Libro[];
+  return (data ?? []) as unknown as LibroCoda[];
 }

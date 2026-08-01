@@ -110,6 +110,19 @@ create index if not exists books_stato_idx       on books (utente, stato);
 create index if not exists books_coda_idx        on books (utente, posizione_coda);
 create index if not exists books_ricerca_idx     on books using gin (to_tsvector('italian', coalesce(titolo,'') || ' ' || coalesce(editore,'')));
 
+-- La ricerca del catalogo usa `ilike '%testo%'`, e un indice tsvector come quello
+-- qui sopra Postgres non lo può usare per un LIKE con il jolly davanti: finiva
+-- sempre in scansione completa della tabella. Il trigram invece funziona proprio
+-- per questo caso.
+create extension if not exists pg_trgm;
+create index if not exists books_titolo_trgm_idx on books using gin (titolo gin_trgm_ops);
+
+-- Le due liste più aperte in assoluto — coda di lettura e magazzino — filtrano
+-- sempre su utente + area + stato. Un indice che copre tutte e tre evita a Postgres
+-- di rileggere le righe una per una.
+create index if not exists books_personale_idx on books (utente, area, stato_lettura);
+create index if not exists books_vendita_idx   on books (utente, area, stato);
+
 -- ---------- aggiornamento automatico del timestamp ----------
 create or replace function tocca_aggiornato_il() returns trigger language plpgsql as $$
 begin

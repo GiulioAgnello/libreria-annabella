@@ -25,13 +25,26 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  // La chiamata da sola basta: se il token è scaduto, lo rinnova usando il refresh
-  // token nel cookie e riscrive i cookie aggiornati nella risposta.
-  await supabase.auth.getUser();
+  // `getClaims()` legge la sessione dai cookie e — se il token è scaduto — lo rinnova
+  // col refresh token, riscrivendo i cookie aggiornati nella risposta: il comportamento
+  // che ci serve resta identico. La differenza è che quando il token è ancora valido
+  // (cioè quasi sempre) la firma viene verificata in locale, senza parlare con Supabase.
+  // Prima, `getUser()` faceva un giro di rete completo su ogni singola richiesta.
+  await supabase.auth.getClaims();
 
   return risposta;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp)$).*)"],
+  matcher: [
+    /*
+     * Il rinnovo della sessione serve solo alle pagine che leggono i cookie.
+     * Restano fuori:
+     *  - gli asset e le rotte interne di Next (_next/*, favicon, immagini, manifest)
+     *  - /api/*, che apre da sé il proprio client Supabase quando gli serve
+     *  - /vetrina, pagina pubblica che non ha nessuna sessione da rinnovare
+     * Ogni percorso escluso è un giro di rete e una funzione serverless in meno.
+     */
+    "/((?!_next/|api/|vetrina|favicon.ico|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$).*)",
+  ],
 };
