@@ -2,10 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { cache } from "react";
 import { CHIAVE_SUPABASE, SUPABASE_CONFIGURATO, URL_SUPABASE } from "./config";
+import { ACCESSO_LOCALE, clientServizio, utenteLocale } from "./servizio";
 
 /** Client lato server, con i cookie della sessione. Null se non ancora configurato. */
 export async function clientServer() {
   if (!SUPABASE_CONFIGURATO) return null;
+
+  // In sviluppo con l'accesso automatico non ci sono cookie di sessione da leggere:
+  // si lavora con la chiave di servizio, che le regole per utente non filtrano.
+  // Il filtro sui dati resta comunque quello di sempre — ogni interrogazione
+  // continua a fare `.eq("utente", …)` — quindi si vedono solo i libri di Annabella.
+  if (ACCESSO_LOCALE) return clientServizio();
+
   const contenitore = await cookies();
 
   return createServerClient(URL_SUPABASE, CHIAVE_SUPABASE, {
@@ -40,6 +48,12 @@ export type UtenteSessione = { id: string; email: string | null };
  * `cache()` deduplica comunque la chiamata dentro lo stesso render.
  */
 export const utenteCorrente = cache(async (): Promise<UtenteSessione | null> => {
+  // Accesso automatico in locale: nessuna sessione da verificare, sei già dentro.
+  if (ACCESSO_LOCALE) {
+    const id = await utenteLocale();
+    return id ? { id, email: "accesso locale" } : null;
+  }
+
   const supabase = await clientServer();
   if (!supabase) return null;
 

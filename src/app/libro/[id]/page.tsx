@@ -23,9 +23,19 @@ export default async function Pagina({
   if (!libro) redirect("/");
 
   const areaColore = libro.area === "personale" ? "#3f5e4e" : "#8b5ca8";
-  const torna = libro.area === "personale" ? "/libreria/catalogo" : "/vendita/magazzino";
+
+  /* Si torna da dove si è arrivati: una copia venduta vive nello storico, non in
+     magazzino, e rimandarla al magazzino significava mandarla in una lista che
+     non la contiene — con l'aria di averla persa. */
+  const torna =
+    libro.area === "personale"
+      ? "/libreria/catalogo"
+      : libro.stato === "venduta"
+        ? "/vendita/vendite"
+        : "/vendita/magazzino";
+
   const salvaLibro = aggiornaLibro.bind(null, id, libro.area);
-  const eliminaLibro = cancellaLibro.bind(null, id, libro.area);
+  const eliminaLibro = cancellaLibro.bind(null, id, torna);
 
   return (
     <PaginaSemplice titolo={libro.titolo} sottotitolo="Modifica le caratteristiche di questa copia.">

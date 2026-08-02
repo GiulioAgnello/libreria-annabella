@@ -134,8 +134,13 @@ export async function aggiornaLibro(id: string, area: "personale" | "vendita", f
   redirect(`/libro/${id}?salvato=1`);
 }
 
-/** Elimina definitivamente una copia dal catalogo. */
-export async function cancellaLibro(id: string, area: "personale" | "vendita") {
+/**
+ * Elimina definitivamente una copia dal catalogo.
+ *
+ * `ritorno` è la lista da cui si era arrivati: dopo aver cancellato una copia
+ * venduta si finisce nello storico, non nel magazzino.
+ */
+export async function cancellaLibro(id: string, ritorno: string) {
   const supabase = await clientServer();
   if (!supabase) return;
 
@@ -150,5 +155,5 @@ export async function cancellaLibro(id: string, area: "personale" | "vendita") {
   revalidatePath("/vendita/contabilita");
   revalidatePath("/vetrina");
 
-  redirect(area === "personale" ? "/libreria/catalogo" : "/vendita/magazzino");
+  redirect(ritorno);
 }

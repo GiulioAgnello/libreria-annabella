@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Shippori_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
+import SegnoLocale from "@/components/SegnoLocale";
 import "./globals.css";
 
 const mincho = Shippori_Mincho({
@@ -68,6 +69,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           aggiungono attributi al body prima che React si avvii. Non è un problema nostro. */}
       <body className="min-h-dvh antialiased" suppressHydrationWarning>
         {children}
+        <SegnoLocale />
       </body>
     </html>
   );

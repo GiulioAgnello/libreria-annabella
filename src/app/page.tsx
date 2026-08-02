@@ -5,8 +5,8 @@ import ModuloAccesso from "@/components/ModuloAccesso";
 import { AREE, type Area } from "@/lib/aree";
 import { utenteCorrente } from "@/lib/supabase/server";
 import { SUPABASE_CONFIGURATO } from "@/lib/supabase/config";
-import { statisticheLibreria } from "@/lib/libri";
-import { statisticheVendita } from "@/lib/vendita";
+import { contaLibreria } from "@/lib/libri";
+import { contaVendita } from "@/lib/vendita";
 
 const SCORCIATOIE = [
   { href: "/aggiungi", testo: "Aggiungi un libro" },
@@ -36,11 +36,9 @@ export default async function Ingresso() {
     );
   }
 
-  const [statLibreria, statVendita] = await Promise.all([statisticheLibreria(), statisticheVendita()]);
-  const CONTEGGI: Record<Area, number> = {
-    libreria: statLibreria.totale,
-    vendita: statVendita.inMagazzino + statVendita.vendute,
-  };
+  // Due conteggi, non due cataloghi: l'ingresso disegna solo questi numeri.
+  const [libreria, vendita] = await Promise.all([contaLibreria(), contaVendita()]);
+  const CONTEGGI: Record<Area, number> = { libreria, vendita };
 
   return (
     <main className="flex min-h-dvh items-center justify-center px-3 py-5">

@@ -20,10 +20,27 @@ const CAMPI_CONTI =
 
 /** Magazzino: la griglia con copertina, il prezzo richiesto, la giacenza, la vetrina. */
 const CAMPI_MAGAZZINO =
-  "id, titolo, autori, copertina_url, stato, prezzo_pagato, prezzo_richiesto, spese, data_acquisto, pubblico";
+  "id, titolo, autori, copertina_url, stato, prezzo_pagato, prezzo_richiesto, spese, data_acquisto, pubblico, editore, condizione";
 
 /** Storico vendite: la tabella con margine e ROI. */
-const CAMPI_STORICO = "id, titolo, autori, stato, prezzo_pagato, prezzo_vendita, margine, data_vendita";
+const CAMPI_STORICO =
+  "id, titolo, autori, stato, prezzo_pagato, prezzo_vendita, margine, data_vendita, editore, canale_vendita, copertina_url";
+
+/**
+ * Cosa vuol dire "in magazzino".
+ *
+ * Una copia prenotata è promessa a qualcuno ma non ancora pagata: finché non
+ * incassi resta merce tua, e va contata fra quello che hai. Prima stava fuori da
+ * entrambe le liste — non era "in magazzino" e non era "venduta" — quindi
+ * segnarla prenotata la faceva sparire dall'applicazione pur restando nel
+ * database. Un elenco solo, usato sia dalla lista sia dai conti del cruscotto,
+ * è ciò che impedisce alle due cose di raccontare numeri diversi.
+ *
+ * Resta invece fuori dalla vetrina pubblica: offrire una copia già promessa
+ * sarebbe solo un modo per doversi scusare dopo.
+ */
+export const STATI_MAGAZZINO = ["in magazzino", "prenotata"] as const;
+const inMagazzinoOra = (stato: string) => (STATI_MAGAZZINO as readonly string[]).includes(stato);
 
 export type VenditaConti = Pick<
   LibroVendita,
@@ -32,12 +49,33 @@ export type VenditaConti = Pick<
 
 export type VenditaMagazzino = Pick<
   LibroVendita,
-  "id" | "titolo" | "autori" | "copertina_url" | "stato" | "prezzo_pagato" | "prezzo_richiesto" | "spese" | "data_acquisto" | "pubblico"
+  | "id"
+  | "titolo"
+  | "autori"
+  | "copertina_url"
+  | "stato"
+  | "prezzo_pagato"
+  | "prezzo_richiesto"
+  | "spese"
+  | "data_acquisto"
+  | "pubblico"
+  | "editore"
+  | "condizione"
 >;
 
 export type VenditaStorico = Pick<
   LibroVendita,
-  "id" | "titolo" | "autori" | "stato" | "prezzo_pagato" | "prezzo_vendita" | "margine" | "data_vendita"
+  | "id"
+  | "titolo"
+  | "autori"
+  | "stato"
+  | "prezzo_pagato"
+  | "prezzo_vendita"
+  | "margine"
+  | "data_vendita"
+  | "editore"
+  | "canale_vendita"
+  | "copertina_url"
 >;
 
 /** Verifica la sessione e scarica le copie dell'area vendita, con le sole colonne chieste. */
@@ -55,6 +93,29 @@ async function libriVendita<T>(campi: string): Promise<T[] | null> {
     .eq("area", "vendita");
 
   return (data ?? []) as unknown as T[];
+}
+
+/**
+ * Quante copie ci sono nell'area compravendita, e basta.
+ *
+ * Serve all'ingresso, che di questa area mostra un solo numero. Prima per
+ * ottenerlo passava da `statisticheVendita()`, cioè scaricava ogni riga per poi
+ * contarle: nove colonne per copia, buttate via subito dopo.
+ */
+export async function contaVendita(): Promise<number> {
+  const utente = await utenteCorrente();
+  if (!utente) return 0;
+
+  const supabase = await clientServer();
+  if (!supabase) return 0;
+
+  const { count } = await supabase
+    .from("books")
+    .select("id", { count: "exact", head: true })
+    .eq("utente", utente.id)
+    .eq("area", "vendita");
+
+  return count ?? 0;
 }
 
 /** I numeri del cruscotto compravendita: utile, incassato, ricarico, valore del magazzino. */
@@ -76,7 +137,10 @@ export async function statisticheVendita() {
   const libri = await libriVendita<VenditaConti>(CAMPI_CONTI);
   if (!libri || libri.length === 0) return vuoto;
 
-  const inMagazzino = libri.filter((l) => l.stato === "in magazzino");
+  // Stesso metro della lista: se il magazzino mostra anche le prenotate, il
+  // cruscotto deve contarle, altrimenti la schermata dice dodici e la pagina
+  // accanto ne elenca tredici.
+  const inMagazzino = libri.filter((l) => inMagazzinoOra(l.stato));
   const vendute = libri.filter((l) => l.stato === "venduta");
 
   const speso = vendute.reduce((s, l) => s + (l.prezzo_pagato ?? 0), 0);
@@ -114,14 +178,33 @@ export async function statisticheVendita() {
   };
 }
 
-/** Le copie ancora in magazzino, con margine atteso e giorni di giacenza. */
-export async function magazzinoVendita() {
+/*
+ * Da qui in giù si legge e basta.
+ *
+ * Filtrare e ordinare non si fa più qui: quelle schermate non hanno paginazione,
+ * quindi ricevono comunque tutte le righe. Farle rimandare dal server ad ogni
+ * cambio di filtro voleva dire ritrasmettere dati che il browser aveva già.
+ * Adesso la lettura è una sola e il resto avviene in memoria (`lib/ordinamenti`),
+ * dove è istantaneo e non costa niente a nessuno.
+ *
+ * I campi calcolati (giacenza, margine atteso, resa) restano invece un lavoro da
+ * server: dipendono dalla data di oggi, e farli fare al browser significherebbe
+ * ottenere numeri diversi da quelli disegnati un istante prima.
+ */
+
+export type RigaMagazzino = VenditaMagazzino & {
+  margineAtteso: number | null;
+  giorniGiacenza: number | null;
+};
+
+/** Tutte le copie ancora da incassare, con margine atteso e giorni di giacenza. */
+export async function magazzinoVendita(): Promise<RigaMagazzino[]> {
   const libri = await libriVendita<VenditaMagazzino>(CAMPI_MAGAZZINO);
   if (!libri) return [];
 
   const oggi = Date.now();
   return libri
-    .filter((l) => l.stato === "in magazzino")
+    .filter((l) => inMagazzinoOra(l.stato))
     .map((l) => ({
       ...l,
       margineAtteso:
@@ -129,12 +212,13 @@ export async function magazzinoVendita() {
       giorniGiacenza: l.data_acquisto
         ? Math.floor((oggi - new Date(l.data_acquisto).getTime()) / 86400000)
         : null,
-    }))
-    .sort((a, b) => (b.giorniGiacenza ?? 0) - (a.giorniGiacenza ?? 0));
+    }));
 }
 
-/** Lo storico completo delle vendite, con margine e ROI per riga. */
-export async function venditeStorico() {
+export type RigaVendita = VenditaStorico & { roi: number | null };
+
+/** Tutte le vendite, con margine e resa sul costo per riga. */
+export async function venditeStorico(): Promise<RigaVendita[]> {
   const libri = await libriVendita<VenditaStorico>(CAMPI_STORICO);
   if (!libri) return [];
 
@@ -142,11 +226,7 @@ export async function venditeStorico() {
     .filter((l) => l.stato === "venduta")
     .map((l) => ({
       ...l,
-      roi: l.prezzo_pagato && l.prezzo_pagato > 0 && l.margine != null ? l.margine / l.prezzo_pagato : null,
-    }))
-    .sort((a, b) => {
-      if (!a.data_vendita) return 1;
-      if (!b.data_vendita) return -1;
-      return new Date(b.data_vendita).getTime() - new Date(a.data_vendita).getTime();
-    });
+      roi:
+        l.prezzo_pagato && l.prezzo_pagato > 0 && l.margine != null ? l.margine / l.prezzo_pagato : null,
+    }));
 }

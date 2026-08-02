@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { AREE, type Area } from "@/lib/aree";
-import { clientBrowser } from "@/lib/supabase/client";
+import { salvaLibro } from "@/lib/azioni-aggiungi";
 import ScannerISBN from "@/components/ScannerISBN";
 
 type Dati = {
@@ -125,25 +125,9 @@ export default function ModuloAggiungi() {
     setSalvando(true);
     setErrore("");
 
-    const supabase = clientBrowser();
-    if (!supabase) {
-      setErrore("Il database non è collegato.");
-      setSalvando(false);
-      return;
-    }
-
-    const { data: sessione } = await supabase.auth.getUser();
-    if (!sessione.user) {
-      setErrore("Sessione scaduta: ricarica la pagina ed entra di nuovo.");
-      setSalvando(false);
-      return;
-    }
-
     const areaDb = AREA_DB[area];
 
     const payload: Record<string, unknown> = {
-      utente: sessione.user.id,
-      area: areaDb,
       isbn: dati.isbn || null,
       titolo: dati.titolo.trim(),
       sottotitolo: dati.sottotitolo || null,
@@ -179,21 +163,15 @@ export default function ModuloAggiungi() {
         // escluderebbe comunque, ma tenere il dato coerente evita sorprese.
         payload.pubblico = false;
       }
-    } else {
-      // La coda di lettura è in ordine di arrivo: il nuovo libro va in fondo.
-      const { count } = await supabase
-        .from("books")
-        .select("id", { count: "exact", head: true })
-        .eq("utente", sessione.user.id)
-        .eq("area", "personale");
-      payload.posizione_coda = (count ?? 0) + 1;
     }
 
-    const { error } = await supabase.from("books").insert(payload);
+    // Chi sei e in che posizione va nella coda li decide il server: qui si manda
+    // soltanto quello che c'è nel modulo.
+    const esito = await salvaLibro(areaDb, payload);
     setSalvando(false);
 
-    if (error) {
-      setErrore("Non sono riuscito a salvare: " + error.message);
+    if (!esito.ok) {
+      setErrore(esito.messaggio);
       return;
     }
     setFase("salvato");

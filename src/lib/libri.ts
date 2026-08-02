@@ -33,6 +33,30 @@ export type Libro = {
  * guardava. Su una connessione di telefono è tempo di attesa regalato.
  */
 
+/**
+ * Quanti libri ci sono, e basta.
+ *
+ * L'ingresso mostra due numeri e nient'altro, ma per averli scaricava l'intera
+ * collezione — tutte le righe di tutte e due le aree — per poi contarle in
+ * memoria e buttarle via. `head: true` chiede al database solo il conteggio:
+ * nessuna riga viaggia sulla rete.
+ */
+export async function contaLibreria(): Promise<number> {
+  const utente = await utenteCorrente();
+  if (!utente) return 0;
+
+  const supabase = await clientServer();
+  if (!supabase) return 0;
+
+  const { count } = await supabase
+    .from("books")
+    .select("id", { count: "exact", head: true })
+    .eq("utente", utente.id)
+    .eq("area", "personale");
+
+  return count ?? 0;
+}
+
 /** Cruscotto: contare, sommare, e mostrare titolo e autore di pochi libri. */
 const CAMPI_SINTESI =
   "id, titolo, autori, stato_lettura, posizione_coda, provenienza, risparmio, prezzo_pagato";
@@ -128,80 +152,31 @@ export async function statisticheLibreria() {
   };
 }
 
-/** Il catalogo completo dell'area personale, con ricerca testo e filtri. */
-export async function catalogoLibreria(filtri: {
-  ricerca?: string;
-  statoLettura?: string;
-  genere?: string;
-  editore?: string;
-}) {
+/**
+ * Il catalogo completo dell'area personale.
+ *
+ * Una lettura sola, senza filtri: ricerca, filtri e ordinamento avvengono nel
+ * browser (`lib/ordinamenti`). La schermata non ha paginazione — riceve comunque
+ * tutti i libri — quindi filtrare qui significava solo rimandare ad ogni tendina
+ * un sottoinsieme di dati già arrivati.
+ *
+ * Anche le voci dei menu si ricavano da queste stesse righe: prima erano una
+ * seconda interrogazione al database, ora sono un giro sull'elenco in mano.
+ */
+export async function catalogoLibreria() {
   const utente = await utenteCorrente();
   if (!utente) return [];
 
   const supabase = await clientServer();
   if (!supabase) return [];
 
-  let query = supabase
+  const { data } = await supabase
     .from("books")
     .select(CAMPI_ELENCO)
     .eq("utente", utente.id)
     .eq("area", "personale");
 
-  if (filtri.statoLettura) {
-    query = query.eq("stato_lettura", filtri.statoLettura);
-  }
-  if (filtri.ricerca) {
-    query = query.ilike("titolo", `%${filtri.ricerca}%`);
-  }
-  if (filtri.genere) {
-    // `generi` è un elenco: `contains` chiede "fra i suoi generi c'è anche questo".
-    query = query.contains("generi", [filtri.genere]);
-  }
-  if (filtri.editore) {
-    query = query.eq("editore", filtri.editore);
-  }
-
-  const { data } = await query.order("titolo", { ascending: true });
   return (data ?? []) as unknown as LibroElenco[];
-}
-
-/**
- * Le voci da mettere nei due menu a tendina del catalogo.
- *
- * Non sono elenchi fissi: si costruiscono dai libri che ci sono davvero, quindi
- * crescono da soli man mano che si aggiungono volumi e non mostrano mai una
- * scelta che non darebbe risultati.
- */
-export async function elenchiCatalogo() {
-  const vuoto = { generi: [] as string[], editori: [] as string[] };
-
-  const utente = await utenteCorrente();
-  if (!utente) return vuoto;
-
-  const supabase = await clientServer();
-  if (!supabase) return vuoto;
-
-  const { data } = await supabase
-    .from("books")
-    .select("generi, editore")
-    .eq("utente", utente.id)
-    .eq("area", "personale");
-
-  if (!data) return vuoto;
-
-  const righe = data as unknown as { generi: string[] | null; editore: string | null }[];
-  const generi = new Set<string>();
-  const editori = new Set<string>();
-
-  for (const r of righe) {
-    for (const g of r.generi ?? []) if (g.trim()) generi.add(g.trim());
-    if (r.editore?.trim()) editori.add(r.editore.trim());
-  }
-
-  return {
-    generi: [...generi].sort((a, b) => a.localeCompare(b, "it")),
-    editori: [...editori].sort((a, b) => a.localeCompare(b, "it")),
-  };
 }
 
 /** La coda "da leggere", in ordine di priorità. */

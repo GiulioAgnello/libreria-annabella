@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { CHIAVE_SUPABASE, SUPABASE_CONFIGURATO, URL_SUPABASE } from "@/lib/supabase/config";
+import { ACCESSO_LOCALE } from "@/lib/supabase/servizio";
 
 /**
  * Rinnova la sessione ad ogni visita. Senza questo passaggio, il token di accesso
@@ -14,6 +15,10 @@ export async function proxy(request: NextRequest) {
   let risposta = NextResponse.next({ request });
 
   if (!SUPABASE_CONFIGURATO) return risposta;
+
+  // Con l'accesso automatico non esiste nessuna sessione da rinnovare: saltiamo
+  // tutto il giro, così in locale ogni pagina parte senza quel passaggio.
+  if (ACCESSO_LOCALE) return risposta;
 
   const supabase = createServerClient(URL_SUPABASE, CHIAVE_SUPABASE, {
     cookies: {
