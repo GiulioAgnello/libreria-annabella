@@ -28,7 +28,7 @@ export default async function Ingresso() {
           </div>
           <h1 className="text-[22px]">La Libreria di Annabella</h1>
           <p className="mt-2 text-[13.5px] text-inchiostro-2">
-            Inserisci la tua email: ti arriverà un collegamento per entrare.
+            Inserisci email e password per entrare.
           </p>
           <ModuloAccesso />
         </div>
