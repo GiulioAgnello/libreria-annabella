@@ -16,8 +16,8 @@ export default function GuscioArea({ area, children }: { area: Area; children: R
 
   const voci = [
     ...dati.voci,
-    { href: "/aggiungi", etichetta: area === "libreria" ? "Aggiungi libro" : "Nuovo acquisto", icona: "piu" },
-    { href: "/impostazioni", etichetta: "Impostazioni", icona: "ingranaggio" },
+    { href: `/aggiungi?area=${area}`, etichetta: area === "libreria" ? "Aggiungi libro" : "Nuovo acquisto", icona: "piu" },
+    { href: `/impostazioni?area=${area}`, etichetta: "Impostazioni", icona: "ingranaggio" },
   ];
 
   return (
@@ -83,7 +83,7 @@ export default function GuscioArea({ area, children }: { area: Area; children: R
       </main>
 
       <nav className="barra-sicura fixed inset-x-0 bottom-0 z-40 flex border-t border-tratto bg-carta/95 px-1 pt-1.5 backdrop-blur md:hidden">
-        {[...dati.voci, { href: "/aggiungi", etichetta: "Aggiungi", icona: "piu" }].map((v) => (
+        {[...dati.voci, { href: `/aggiungi?area=${area}`, etichetta: "Aggiungi", icona: "piu" }].map((v) => (
           <VoceNav
             key={v.href}
             href={v.href}

@@ -1,14 +1,22 @@
 import PaginaSemplice from "@/components/PaginaSemplice";
+import GuscioArea from "@/components/GuscioArea";
+import Intestazione from "@/components/Intestazione";
+import { areaDaParametro } from "@/lib/aree";
 import Vuoto from "@/components/Vuoto";
 
-export default function Impostazioni() {
-  return (
-    <PaginaSemplice titolo="Impostazioni" sottotitolo="Elenchi, importazione, copie di sicurezza.">
+const TITOLO = "Impostazioni";
+const SOTTOTITOLO = "Elenchi, importazione, copie di sicurezza.";
+
+/** Aperta dal menu di un'area (`?area=…`) resta dentro quell'area; dall'ingresso, pagina semplice. */
+export default async function Impostazioni({ searchParams }: { searchParams: Promise<{ area?: string }> }) {
+  const area = areaDaParametro((await searchParams).area);
+  const contenuto = (
+    <>
       <div className="tessera mb-4 px-6 py-6">
         <h3 className="text-[16px]">Copia di sicurezza</h3>
         <p className="mt-1.5 text-[13.5px] leading-relaxed text-inchiostro-2">
-          Scarica tutti i tuoi libri — collezione personale e compravendita — in un file che puoi aprire con
-          Excel o Fogli Google. Nessun dato resta solo dentro l&apos;app.
+          Scarica tutti i tuoi libri — collezione personale e compravendita — in un file che puoi aprire con Excel o
+          Fogli Google. Nessun dato resta solo dentro l&apos;app.
         </p>
         <a
           href="/api/export"
@@ -23,6 +31,23 @@ export default function Impostazioni() {
         testo="Qui potrai gestire l'elenco dei generi e dei canali di acquisto/vendita che usi più spesso."
         fase="Rifinitura futura"
       />
-    </PaginaSemplice>
+    </>
+  );
+
+  if (!area) {
+    return (
+      <PaginaSemplice titolo={TITOLO} sottotitolo={SOTTOTITOLO}>
+        {contenuto}
+      </PaginaSemplice>
+    );
+  }
+
+  return (
+    <GuscioArea area={area}>
+      <div className="max-w-[760px]">
+        <Intestazione titolo={TITOLO} sottotitolo={SOTTOTITOLO} />
+        {contenuto}
+      </div>
+    </GuscioArea>
   );
 }
