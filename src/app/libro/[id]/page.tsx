@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import CaricaCopertina from "@/components/CaricaCopertina";
+import Icona from "@/components/Icona";
 import PaginaSemplice from "@/components/PaginaSemplice";
 import BottoneElimina from "@/components/BottoneElimina";
 import BottoneIndietro from "@/components/BottoneIndietro";
@@ -279,9 +280,10 @@ export default async function Pagina({
           <form action={sposta} className="flex flex-wrap items-center gap-3">
             <button
               type="submit"
-              className="rounded-[9px] border px-4 py-2.5 text-[13.5px] transition hover:bg-superficie"
+              className="inline-flex items-center gap-2 rounded-[9px] border px-4 py-2.5 text-[13.5px] transition hover:bg-superficie"
               style={{ borderColor: coloreDestinazione, color: coloreDestinazione }}
             >
+              <Icona nome="sposta" className="size-3.5" />
               Sposta in {nomeDestinazione}
             </button>
             <span className="text-[12.5px] text-inchiostro-3">

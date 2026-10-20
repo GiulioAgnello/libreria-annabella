@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import "@fortawesome/fontawesome-svg-core/styles.css";
 import { Shippori_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
 import SegnoLocale from "@/components/SegnoLocale";
 import "./globals.css";

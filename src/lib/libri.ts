@@ -9,6 +9,8 @@ export type Libro = {
   editore: string | null;
   anno: number | null;
   copertina_url: string | null;
+  pagine: number | null;
+  pagina_attuale: number | null;
   generi: string[];
   formato: string | null;
   condizione: string | null;
@@ -59,7 +61,7 @@ export async function contaLibreria(): Promise<number> {
 
 /** Cruscotto: contare, sommare, e mostrare titolo e autore di pochi libri. */
 const CAMPI_SINTESI =
-  "id, titolo, autori, stato_lettura, posizione_coda, provenienza, risparmio, prezzo_pagato";
+  "id, titolo, autori, stato_lettura, posizione_coda, provenienza, risparmio, prezzo_pagato, copertina_url, pagine, pagina_attuale";
 
 /** Catalogo: quello che si vede in griglia e in tabella, più i campi su cui si filtra. */
 const CAMPI_ELENCO =
@@ -78,6 +80,9 @@ export type LibroSintesi = Pick<
   | "provenienza"
   | "risparmio"
   | "prezzo_pagato"
+  | "copertina_url"
+  | "pagine"
+  | "pagina_attuale"
 >;
 
 export type LibroElenco = Pick<
