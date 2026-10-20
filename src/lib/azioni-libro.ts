@@ -189,6 +189,8 @@ export async function spostaLibro(id: string, verso: "personale" | "vendita") {
     patch.stato = "in magazzino";
     patch.pubblico = false;
     patch.posizione_coda = null;
+    // Un libro da rivendere non è più tra quelli da leggere in questo periodo.
+    patch.tbr_aggiunto = null;
   } else {
     const { data: ultimo } = await supabase
       .from("books")

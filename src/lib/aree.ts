@@ -18,6 +18,7 @@ export const AREE: Record<
       { href: "/libreria", etichetta: "Cruscotto", icona: "cruscotto" },
       { href: "/libreria/catalogo", etichetta: "Catalogo", icona: "libro" },
       { href: "/libreria/da-leggere", etichetta: "Da leggere", icona: "lista" },
+      { href: "/libreria/tbr", etichetta: "TBR", icona: "tbr" },
     ],
   },
   vendita: {

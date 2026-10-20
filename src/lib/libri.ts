@@ -203,3 +203,53 @@ export async function codaLettura() {
 
   return (data ?? []) as unknown as LibroCoda[];
 }
+
+export type LibroTbr = {
+  id: string;
+  titolo: string;
+  autori: string[];
+  copertina_url: string | null;
+  stato_lettura: string;
+  pagine: number | null;
+  pagina_attuale: number | null;
+  tbr_aggiunto: string | null;
+};
+
+/**
+ * La TBR e i libri che ci si possono aggiungere, in una lettura sola: sono tutti
+ * libri dell'area personale, cambia solo se `tbr_aggiunto` è pieno o vuoto.
+ *
+ * Nella TBR prima quelli ancora da finire, nell'ordine in cui sono stati messi;
+ * in fondo quelli già letti, che restano lì come spunta del periodo.
+ */
+export async function tbrLibreria(): Promise<{ tbr: LibroTbr[]; candidati: LibroTbr[] }> {
+  const vuoto = { tbr: [], candidati: [] };
+
+  const utente = await utenteCorrente();
+  if (!utente) return vuoto;
+
+  const supabase = await clientServer();
+  if (!supabase) return vuoto;
+
+  const { data } = await supabase
+    .from("books")
+    .select("id, titolo, autori, copertina_url, stato_lettura, pagine, pagina_attuale, tbr_aggiunto")
+    .eq("utente", utente.id)
+    .eq("area", "personale")
+    .order("titolo", { ascending: true });
+
+  const libri = (data ?? []) as LibroTbr[];
+  const finito = (l: LibroTbr) => l.stato_lettura === "letto" || l.stato_lettura === "abbandonato";
+
+  const tbr = libri
+    .filter((l) => l.tbr_aggiunto)
+    .sort((a, b) => Number(finito(a)) - Number(finito(b)) || a.tbr_aggiunto!.localeCompare(b.tbr_aggiunto!));
+
+  // Tra i candidati prima quelli da leggere: è lì che di solito si pesca.
+  const ordine: Record<string, number> = { "da leggere": 0, "in lettura": 1, abbandonato: 2, letto: 3 };
+  const candidati = libri
+    .filter((l) => !l.tbr_aggiunto)
+    .sort((a, b) => (ordine[a.stato_lettura] ?? 9) - (ordine[b.stato_lettura] ?? 9));
+
+  return { tbr, candidati };
+}

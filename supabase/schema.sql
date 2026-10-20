@@ -179,3 +179,6 @@ create trigger crea_profilo_trigger after insert on auth.users
 -- ---------- copertine caricate a mano ----------
 -- Il bucket dello Storage e le sue regole sono in supabase/copertine.sql:
 -- eseguilo dopo questo file.
+
+-- ---------- TBR ----------
+-- La colonna tbr_aggiunto è in supabase/tbr.sql.
