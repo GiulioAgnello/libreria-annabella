@@ -9,7 +9,10 @@ export default async function Aggiungi() {
 
   return (
     <PaginaSemplice titolo="Aggiungi un libro" sottotitolo="Inquadra il codice a barre. Il resto si scrive da sé.">
-      <ModuloAggiungi />
+      {/* La chiave Google viaggia fino al browser solo per chi ha fatto l'accesso:
+          la ricerca su Google Books parte dal telefono (dal server Vercel Google
+          risponde 503) e senza chiave finisce nella quota anonima, sempre esaurita. */}
+      <ModuloAggiungi chiaveGoogle={process.env.GOOGLE_BOOKS_API_KEY ?? null} />
     </PaginaSemplice>
   );
 }
