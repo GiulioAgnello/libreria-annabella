@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import Icona from "@/components/Icona";
+import AvanzamentoLettura from "@/components/AvanzamentoLettura";
 
 type Dati = {
   id: string;
@@ -13,11 +14,11 @@ type Dati = {
 
 /**
  * Mini scheda di un libro per il cruscotto: copertina, titolo, autore e — per i
- * libri in lettura — a che punto è arrivata. Tutta la scheda è un link alla
- * pagina del libro.
+ * libri in lettura — a che punto è arrivata.
  *
- * L'avanzamento compare solo se si conoscono sia le pagine totali sia la pagina
- * attuale; altrimenti un invito discreto a segnarla, che porta proprio lì.
+ * Per i libri in lettura c'è anche l'avanzamento, con "Aggiorna" per segnare
+ * la pagina senza aprire la scheda (vedi `AvanzamentoLettura`). Per questo la
+ * scheda non è più un link unico: lo sono la copertina e il titolo.
  */
 export default function SchedinaLibro({
   libro,
@@ -32,16 +33,16 @@ export default function SchedinaLibro({
   colore?: string;
   className?: string;
 }) {
-  const { pagine, pagina_attuale: pagina } = libro;
-  const percento =
-    pagine && pagina ? Math.min(100, Math.max(0, Math.round((pagina / pagine) * 100))) : null;
-
   return (
-    <Link
-      href={`/libro/${libro.id}`}
-      className={`tessera group flex gap-3.5 px-3.5 py-3.5 transition hover:-translate-y-[2px] hover:border-inchiostro-3 ${className}`}
+    <div
+      className={`tessera flex gap-3.5 px-3.5 py-3.5 transition hover:-translate-y-[2px] hover:border-inchiostro-3 ${className}`}
     >
-      <div className="h-[84px] w-[56px] shrink-0 overflow-hidden rounded-[5px] border border-tratto bg-glicine-tenue shadow-[0_2px_6px_rgba(28,25,23,0.12)]">
+      <Link
+        href={`/libro/${libro.id}`}
+        tabIndex={-1}
+        aria-hidden
+        className="h-[84px] w-[56px] shrink-0 overflow-hidden rounded-[5px] border border-tratto bg-glicine-tenue shadow-[0_2px_6px_rgba(28,25,23,0.12)]"
+      >
         {libro.copertina_url ? (
           <Image
             src={libro.copertina_url}
@@ -56,7 +57,7 @@ export default function SchedinaLibro({
             <Icona nome="libro" className="size-5" />
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex min-w-0 flex-1 flex-col">
         {etichetta && (
@@ -64,31 +65,24 @@ export default function SchedinaLibro({
             {etichetta}
           </span>
         )}
-        <span className="line-clamp-2 text-[14.5px] leading-snug group-hover:underline">{libro.titolo}</span>
-        {libro.autori[0] && <span className="mt-0.5 truncate text-[12.5px] text-inchiostro-3">{libro.autori[0]}</span>}
+        <Link href={`/libro/${libro.id}`} className="group flex min-w-0 flex-col">
+          <span className="line-clamp-2 text-[14.5px] leading-snug group-hover:underline">{libro.titolo}</span>
+          {libro.autori[0] && (
+            <span className="mt-0.5 truncate text-[12.5px] text-inchiostro-3">{libro.autori[0]}</span>
+          )}
+        </Link>
 
         {avanzamento && (
-          <div className="mt-auto pt-2">
-            {percento !== null ? (
-              <>
-                <div className="h-[5px] overflow-hidden rounded-full bg-tratto/60">
-                  <div className="h-full rounded-full" style={{ width: `${percento}%`, background: colore }} />
-                </div>
-                <div className="mt-1 flex justify-between text-[11.5px] text-inchiostro-3">
-                  <span>
-                    pag. {pagina} di {pagine}
-                  </span>
-                  <span className="numero" style={{ color: colore }}>
-                    {percento}%
-                  </span>
-                </div>
-              </>
-            ) : (
-              <span className="text-[11.5px] text-inchiostro-3">Segna a che pagina sei →</span>
-            )}
+          <div className="mt-auto">
+            <AvanzamentoLettura
+              id={libro.id}
+              pagina={libro.pagina_attuale ?? null}
+              pagine={libro.pagine ?? null}
+              colore={colore}
+            />
           </div>
         )}
       </div>
-    </Link>
+    </div>
   );
 }

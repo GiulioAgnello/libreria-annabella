@@ -19,6 +19,7 @@ export async function segnaStatoLettura(id: string, nuovoStato: string) {
   revalidatePath("/libreria");
   revalidatePath("/libreria/catalogo");
   revalidatePath("/libreria/da-leggere");
+  revalidatePath("/libreria/tbr");
 }
 
 /** Sposta un libro su o giù di una posizione nella coda di lettura. */
@@ -53,4 +54,55 @@ export async function spostaCoda(id: string, direzione: "su" | "giu") {
 
   revalidatePath("/libreria/da-leggere");
   revalidatePath("/libreria");
+}
+
+export type EsitoPagina = { ok: true; finito: boolean } | { ok: false; messaggio: string };
+
+/**
+ * Aggiorna la pagina a cui si è arrivati, dal cruscotto o dalla TBR, senza
+ * aprire la scheda del libro. `totale` serve solo quando il libro non ha ancora
+ * il numero di pagine: si chiede lì, una volta, e resta salvato.
+ *
+ * Arrivati all'ultima pagina il libro diventa "letto", con la data di oggi.
+ */
+export async function aggiornaPagina(id: string, pagina: number, totale?: number | null): Promise<EsitoPagina> {
+  const utente = await utenteCorrente();
+  const supabase = await clientServer();
+  if (!utente || !supabase) return { ok: false, messaggio: "Sessione scaduta: ricarica la pagina." };
+
+  if (!Number.isInteger(pagina) || pagina < 0) return { ok: false, messaggio: "Scrivi un numero di pagina valido." };
+
+  const { data: libro } = await supabase
+    .from("books")
+    .select("pagine, stato_lettura, data_inizio")
+    .eq("id", id)
+    .eq("utente", utente.id)
+    .single();
+  if (!libro) return { ok: false, messaggio: "Libro non trovato." };
+
+  const pagine = libro.pagine ?? (totale && totale > 0 ? Math.round(totale) : null);
+  if (pagine && pagina > pagine) return { ok: false, messaggio: `Il libro ha ${pagine} pagine.` };
+
+  const patch: Record<string, unknown> = { pagina_attuale: pagina };
+  if (!libro.pagine && pagine) patch.pagine = pagine;
+
+  // Chi segna una pagina sta leggendo: se il libro era ancora "da leggere", parte ora.
+  if (pagina > 0 && libro.stato_lettura === "da leggere") {
+    patch.stato_lettura = "in lettura";
+    if (!libro.data_inizio) patch.data_inizio = OGGI();
+  }
+
+  const finito = Boolean(pagine && pagina === pagine);
+  if (finito) {
+    patch.stato_lettura = "letto";
+    patch.data_fine = OGGI();
+  }
+
+  const { error } = await supabase.from("books").update(patch).eq("id", id).eq("utente", utente.id);
+  if (error) return { ok: false, messaggio: "Non sono riuscito a salvare: " + error.message };
+
+  ["/libreria", "/libreria/catalogo", "/libreria/da-leggere", "/libreria/tbr", `/libro/${id}`].forEach((p) =>
+    revalidatePath(p),
+  );
+  return { ok: true, finito };
 }
