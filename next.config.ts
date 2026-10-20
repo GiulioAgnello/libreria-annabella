@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "books.google.com" },
       { protocol: "https", hostname: "books.googleusercontent.com" },
       { protocol: "https", hostname: "covers.openlibrary.org" },
+      // copertine caricate a mano, nello Storage di Supabase
+      { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 };

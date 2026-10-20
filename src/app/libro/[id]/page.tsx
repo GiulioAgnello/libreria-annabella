@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import Image from "next/image";
+import CaricaCopertina from "@/components/CaricaCopertina";
 import PaginaSemplice from "@/components/PaginaSemplice";
 import BottoneElimina from "@/components/BottoneElimina";
 import BottoneIndietro from "@/components/BottoneIndietro";
@@ -52,15 +52,7 @@ export default async function Pagina({
 
       <form action={salvaLibro} className="space-y-5">
         <div className="flex gap-4">
-          {libro.copertina_url && (
-            <Image
-              src={libro.copertina_url}
-              alt=""
-              width={88}
-              height={132}
-              className="h-[132px] w-[88px] shrink-0 rounded-[6px] border border-tratto object-cover"
-            />
-          )}
+          <CaricaCopertina url={libro.copertina_url} libroId={libro.id} />
           <div className="flex-1 space-y-3">
             <div>
               <label className={ETICHETTA}>Titolo *</label>
