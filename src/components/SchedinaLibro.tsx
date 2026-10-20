@@ -24,11 +24,13 @@ export default function SchedinaLibro({
   avanzamento = false,
   etichetta,
   colore = "#3f5e4e",
+  className = "",
 }: {
   libro: Dati;
   avanzamento?: boolean;
   etichetta?: string;
   colore?: string;
+  className?: string;
 }) {
   const { pagine, pagina_attuale: pagina } = libro;
   const percento =
@@ -37,7 +39,7 @@ export default function SchedinaLibro({
   return (
     <Link
       href={`/libro/${libro.id}`}
-      className="tessera group flex gap-3.5 px-3.5 py-3.5 transition hover:-translate-y-[2px] hover:border-inchiostro-3"
+      className={`tessera group flex gap-3.5 px-3.5 py-3.5 transition hover:-translate-y-[2px] hover:border-inchiostro-3 ${className}`}
     >
       <div className="h-[84px] w-[56px] shrink-0 overflow-hidden rounded-[5px] border border-tratto bg-glicine-tenue shadow-[0_2px_6px_rgba(28,25,23,0.12)]">
         {libro.copertina_url ? (
