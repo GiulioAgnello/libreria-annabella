@@ -175,3 +175,7 @@ end $$;
 drop trigger if exists crea_profilo_trigger on auth.users;
 create trigger crea_profilo_trigger after insert on auth.users
   for each row execute function crea_profilo();
+
+-- ---------- copertine caricate a mano ----------
+-- Il bucket dello Storage e le sue regole sono in supabase/copertine.sql:
+-- eseguilo dopo questo file.

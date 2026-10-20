@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { AREE, type Area } from "@/lib/aree";
 import { salvaLibro } from "@/lib/azioni-aggiungi";
 import ScannerISBN from "@/components/ScannerISBN";
+import CaricaCopertina from "@/components/CaricaCopertina";
 
 type Dati = {
   isbn: string;
@@ -282,21 +282,13 @@ export default function ModuloAggiungi() {
 
       {nonTrovato && (
         <p className="tessera px-4 py-3 text-[13px] text-inchiostro-2">
-          Non ho trovato questo ISBN nei cataloghi online: compila a mano, va bene lo stesso.
+          Non ho trovato questo ISBN nei cataloghi online: compila a mano, va bene lo stesso. Per la
+          copertina tocca il riquadro qui sotto e fai una foto al libro.
         </p>
       )}
 
       <div className="flex gap-4">
-        {dati.copertinaUrl && (
-          <Image
-            src={dati.copertinaUrl}
-            alt=""
-            width={88}
-            height={132}
-            unoptimized
-            className="h-[132px] w-[88px] shrink-0 rounded-[6px] border border-tratto object-cover"
-          />
-        )}
+        <CaricaCopertina url={dati.copertinaUrl || null} onCambia={(u) => aggiorna("copertinaUrl", u ?? "")} />
         <div className="flex-1 space-y-3">
           <div>
             <label className={ETICHETTA}>Titolo *</label>
