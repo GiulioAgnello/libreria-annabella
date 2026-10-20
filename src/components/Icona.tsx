@@ -33,6 +33,7 @@ import {
   faBookmark,
   faFire,
   faXmark,
+  faPen,
 } from "@fortawesome/free-solid-svg-icons";
 
 /* Il CSS di Font Awesome lo importa `layout.tsx` una volta sola: così le icone
@@ -66,6 +67,7 @@ const ICONE: Record<string, IconDefinition> = {
   coda: faBookBookmark,
   tbr: faFire,
   chiudi: faXmark,
+  matita: faPen,
   letto: faCircleCheck,
   biblioteca: faBuildingColumns,
   audiolibro: faHeadphones,
