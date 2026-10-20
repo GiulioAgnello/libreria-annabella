@@ -6,6 +6,7 @@ import { AREE, type Area } from "@/lib/aree";
 import { salvaLibro } from "@/lib/azioni-aggiungi";
 import ScannerISBN from "@/components/ScannerISBN";
 import CaricaCopertina from "@/components/CaricaCopertina";
+import { cercaGoogleDalBrowser, unisci, type DatiLibro } from "@/lib/dati-libro";
 
 type Dati = {
   isbn: string;
@@ -89,9 +90,18 @@ export default function ModuloAggiungi() {
     setFase("cercando");
     setErrore("");
     try {
-      const risposta = await fetch(`/api/libro?isbn=${encodeURIComponent(isbn)}`);
-      const corpo = await risposta.json();
-      setNonTrovato(!corpo.trovato);
+      // Google dal telefono (dal server Vercel non risponde) e OpenLibrary dal
+      // server, in parallelo. Google ha la precedenza: sui libri italiani è più
+      // completo. Basta che uno dei due trovi il libro.
+      const [google, server] = await Promise.all([
+        cercaGoogleDalBrowser(isbn),
+        fetch(`/api/libro?isbn=${encodeURIComponent(isbn)}`)
+          .then((r) => r.json())
+          .then((c): DatiLibro | null => (c?.trovato ? c : null))
+          .catch(() => null),
+      ]);
+      const corpo: DatiLibro = unisci(google, server) ?? {};
+      setNonTrovato(!corpo.titolo);
       setDati((d) => ({
         ...d,
         isbn,
