@@ -157,3 +157,66 @@ export async function cancellaLibro(id: string, ritorno: string) {
 
   redirect(ritorno);
 }
+
+/**
+ * Sposta una copia da un'area all'altra — libreria personale ↔ compravendita —
+ * senza cancellarla e reinserirla: restano dati, prezzi, copertina e note.
+ *
+ * - verso la compravendita: entra in magazzino, non in vetrina (va messa
+ *   pubblica a mano, quando ha un prezzo richiesto);
+ * - verso la libreria: va in fondo alla coda di lettura. Si usa il massimo e non
+ *   il conteggio, perché dopo spostamenti e cancellazioni le posizioni possono
+ *   avere dei buchi e il conteggio finirebbe su un numero già occupato.
+ *
+ * Una copia già venduta non si sposta: non è più di Annabella.
+ */
+export async function spostaLibro(id: string, verso: "personale" | "vendita") {
+  const utente = await utenteCorrente();
+  const supabase = await clientServer();
+  if (!utente || !supabase) return;
+
+  const { data: libro } = await supabase
+    .from("books")
+    .select("area, stato")
+    .eq("id", id)
+    .eq("utente", utente.id)
+    .single();
+  if (!libro || libro.area === verso || libro.stato === "venduta") redirect(`/libro/${id}`);
+
+  const patch: Record<string, unknown> = { area: verso };
+
+  if (verso === "vendita") {
+    patch.stato = "in magazzino";
+    patch.pubblico = false;
+    patch.posizione_coda = null;
+  } else {
+    const { data: ultimo } = await supabase
+      .from("books")
+      .select("posizione_coda")
+      .eq("utente", utente.id)
+      .eq("area", "personale")
+      .not("posizione_coda", "is", null)
+      .order("posizione_coda", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    patch.posizione_coda = (ultimo?.posizione_coda ?? 0) + 1;
+    patch.pubblico = false;
+  }
+
+  await supabase.from("books").update(patch).eq("id", id).eq("utente", utente.id);
+
+  [
+    "/",
+    `/libro/${id}`,
+    "/libreria",
+    "/libreria/catalogo",
+    "/libreria/da-leggere",
+    "/vendita",
+    "/vendita/magazzino",
+    "/vendita/vendite",
+    "/vendita/contabilita",
+    "/vetrina",
+  ].forEach((p) => revalidatePath(p));
+
+  redirect(`/libro/${id}?spostato=1`);
+}
