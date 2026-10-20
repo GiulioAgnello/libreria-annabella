@@ -73,7 +73,7 @@ const CAMPO =
   "w-full rounded-[9px] border border-tratto bg-superficie px-3 py-2.5 text-[14px] outline-none focus:border-bosco";
 const ETICHETTA = "mb-1 block text-[12.5px] text-inchiostro-2";
 
-export default function ModuloAggiungi() {
+export default function ModuloAggiungi({ chiaveGoogle }: { chiaveGoogle: string | null }) {
   const [area, setArea] = useState<Area | null>(null);
   const [fase, setFase] = useState<"isbn" | "cercando" | "scheda" | "salvato">("isbn");
   const [dati, setDati] = useState<Dati>(VUOTO);
@@ -94,7 +94,7 @@ export default function ModuloAggiungi() {
       // server, in parallelo. Google ha la precedenza: sui libri italiani è più
       // completo. Basta che uno dei due trovi il libro.
       const [google, server] = await Promise.all([
-        cercaGoogleDalBrowser(isbn),
+        cercaGoogleDalBrowser(isbn, chiaveGoogle),
         fetch(`/api/libro?isbn=${encodeURIComponent(isbn)}`)
           .then((r) => r.json())
           .then((c): DatiLibro | null => (c?.trovato ? c : null))

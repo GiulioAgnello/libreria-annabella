@@ -59,17 +59,20 @@ export function unisci(primario: DatiLibro | null, secondario: DatiLibro | null)
 }
 
 /**
- * Google Books interrogato dal browser, senza chiave.
+ * Google Books interrogato dal browser, con la chiave del progetto.
  *
  * Dal server non funziona: Google risponde `503` alle richieste che partono dai
- * datacenter di Vercel, con o senza chiave. Dalla connessione di casa o del
- * telefono invece risponde normalmente, e per pochi libri al giorno la quota
- * senza chiave basta e avanza. Se fallisce per qualunque motivo restituisce
- * null, e il modulo si accontenta di quello che ha trovato il server.
+ * datacenter di Vercel. Dal browser risponde, ma *senza chiave* le richieste
+ * finiscono nella quota anonima condivisa da tutto il mondo, esaurita quasi
+ * sempre (`429`): per questo la chiave serve anche qui. Se fallisce per
+ * qualunque motivo restituisce null, e il modulo si accontenta di quello che ha
+ * trovato il server.
  */
-export async function cercaGoogleDalBrowser(isbn: string): Promise<DatiLibro | null> {
+export async function cercaGoogleDalBrowser(isbn: string, chiave?: string | null): Promise<DatiLibro | null> {
   try {
-    const risposta = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`, {
+    const url =
+      `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}` + (chiave ? `&key=${encodeURIComponent(chiave)}` : "");
+    const risposta = await fetch(url, {
       signal: AbortSignal.timeout(6000),
     });
     if (!risposta.ok) return null;
