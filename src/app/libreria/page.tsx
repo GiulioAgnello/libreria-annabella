@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
+import Icona from "@/components/Icona";
+import SchedinaLibro from "@/components/SchedinaLibro";
 import { statisticheLibreria } from "@/lib/libri";
 import { statisticheVendita } from "@/lib/vendita";
 
@@ -29,12 +31,12 @@ export default async function Pagina() {
   }
 
   const NUMERI = [
-    { valore: stat.totale, etichetta: "in collezione" },
-    { valore: stat.daLeggere, etichetta: "da leggere" },
-    { valore: stat.inLettura, etichetta: "in lettura" },
-    { valore: stat.letti, etichetta: "letti" },
-    { valore: stat.prestiti, etichetta: "in prestito" },
-    { valore: stat.audiolibri, etichetta: "audiolibri" },
+    { valore: stat.totale, etichetta: "in collezione", icona: "collezione" },
+    { valore: stat.daLeggere, etichetta: "da leggere", icona: "da-leggere" },
+    { valore: stat.inLettura, etichetta: "in lettura", icona: "in-lettura" },
+    { valore: stat.letti, etichetta: "letti", icona: "letto" },
+    { valore: stat.prestiti, etichetta: "in prestito", icona: "biblioteca" },
+    { valore: stat.audiolibri, etichetta: "audiolibri", icona: "audiolibro" },
   ];
 
   return (
@@ -45,7 +47,10 @@ export default async function Pagina() {
       />
 
       <div className="tessera mb-5 px-6 py-6">
-        <div className="text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">Risparmio sull&apos;usato</div>
+        <div className="flex items-center gap-2 text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">
+          <Icona nome="salvadanaio" className="size-4 text-bosco" />
+          Risparmio sull&apos;usato
+        </div>
         <div className="numero mt-1 text-[34px] text-bosco">{EURO(stat.risparmio)}</div>
       </div>
 
@@ -53,7 +58,8 @@ export default async function Pagina() {
           contro quanto ha reso rivendere gli altri. Se il saldo è positivo, il
           banchetto dell'usato si è pagato la libreria. */}
       <div className="tessera mb-5 px-6 py-5">
-        <div className="text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">
+        <div className="flex items-center gap-2 text-[12.5px] uppercase tracking-[0.1em] text-inchiostro-3">
+          <Icona nome="bilancia" className="size-4 text-bosco" />
           Le rivendite pagano la libreria?
         </div>
 
@@ -86,48 +92,49 @@ export default async function Pagina() {
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
         {NUMERI.map((n) => (
           <div key={n.etichetta} className="tessera px-3 py-4 text-center">
+            <Icona nome={n.icona} className="mx-auto mb-1.5 size-[18px] text-bosco/80" />
             <div className="numero text-[22px]">{n.valore}</div>
             <div className="mt-0.5 text-[11px] leading-tight text-inchiostro-3">{n.etichetta}</div>
           </div>
         ))}
       </div>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="tessera px-5 py-5">
-          <h3 className="text-[15px] text-inchiostro-2">In lettura adesso</h3>
-          {stat.inCorso.length === 0 ? (
-            <p className="mt-2 text-[13.5px] text-inchiostro-3">Nessun libro aperto al momento.</p>
-          ) : (
-            <ul className="mt-3 space-y-2">
-              {stat.inCorso.map((l) => (
-                <li key={l.id} className="text-[14px]">
-                  <Link href={`/libro/${l.id}`} className="hover:underline">
-                    {l.titolo}
-                    {l.autori[0] && <span className="text-inchiostro-3"> — {l.autori[0]}</span>}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+      <section className="mt-6">
+        <h3 className="mb-2.5 flex items-center gap-2 text-[15px] text-inchiostro-2">
+          <Icona nome="in-lettura" className="size-[17px] text-bosco" />
+          In lettura adesso
+        </h3>
+        {stat.inCorso.length === 0 ? (
+          <p className="tessera px-5 py-4 text-[13.5px] text-inchiostro-3">Nessun libro aperto al momento.</p>
+        ) : (
+          <div className="grid gap-2.5 sm:grid-cols-2">
+            {stat.inCorso.map((l) => (
+              <SchedinaLibro key={l.id} libro={l} avanzamento />
+            ))}
+          </div>
+        )}
+      </section>
 
-        <div className="tessera px-5 py-5">
-          <h3 className="text-[15px] text-inchiostro-2">Prossimo in coda</h3>
-          {stat.prossimo ? (
-            <>
-              <Link href={`/libro/${stat.prossimo.id}`} className="mt-2 block text-[14px] hover:underline">
-                {stat.prossimo.titolo}
-                {stat.prossimo.autori[0] && <span className="text-inchiostro-3"> — {stat.prossimo.autori[0]}</span>}
-              </Link>
-              <Link href="/libreria/da-leggere" className="mt-3 inline-block text-[12.5px] underline text-inchiostro-2">
-                Vedi tutta la coda →
-              </Link>
-            </>
-          ) : (
-            <p className="mt-2 text-[13.5px] text-inchiostro-3">La coda è vuota.</p>
+      <section className="mt-6">
+        <div className="mb-2.5 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-[15px] text-inchiostro-2">
+            <Icona nome="coda" className="size-[17px] text-bosco" />
+            Prossimo in coda
+          </h3>
+          {stat.prossimo && (
+            <Link href="/libreria/da-leggere" className="text-[12.5px] underline text-inchiostro-2">
+              Tutta la coda →
+            </Link>
           )}
         </div>
-      </div>
+        {stat.prossimo ? (
+          <div className="sm:max-w-[calc(50%-5px)]">
+            <SchedinaLibro libro={stat.prossimo} etichetta="Il prossimo da aprire" />
+          </div>
+        ) : (
+          <p className="tessera px-5 py-4 text-[13.5px] text-inchiostro-3">La coda è vuota.</p>
+        )}
+      </section>
     </>
   );
 }

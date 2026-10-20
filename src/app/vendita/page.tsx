@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Icona from "@/components/Icona";
 import Intestazione from "@/components/Intestazione";
 import Vuoto from "@/components/Vuoto";
 import { statisticheVendita } from "@/lib/vendita";
@@ -23,12 +24,12 @@ export default async function Pagina() {
   }
 
   const NUMERI = [
-    { valore: EURO(stat.utile), etichetta: "utile" },
-    { valore: EURO(stat.incassato), etichetta: "incassato" },
-    { valore: `${stat.ricarico.toFixed(1)}×`, etichetta: "ricarico medio" },
-    { valore: EURO(stat.valoreMagazzino), etichetta: "valore magazzino" },
-    { valore: EURO(stat.margineMedio), etichetta: "margine medio/copia" },
-    { valore: String(stat.inMagazzino), etichetta: "copie in magazzino" },
+    { valore: EURO(stat.utile), etichetta: "utile", icona: "grafico" },
+    { valore: EURO(stat.incassato), etichetta: "incassato", icona: "monete" },
+    { valore: `${stat.ricarico.toFixed(1)}×`, etichetta: "ricarico medio", icona: "percentuale" },
+    { valore: EURO(stat.valoreMagazzino), etichetta: "valore magazzino", icona: "portafoglio" },
+    { valore: EURO(stat.margineMedio), etichetta: "margine medio/copia", icona: "scontrino" },
+    { valore: String(stat.inMagazzino), etichetta: "copie in magazzino", icona: "magazzino" },
   ];
 
   return (
@@ -38,6 +39,7 @@ export default async function Pagina() {
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {NUMERI.map((n) => (
           <div key={n.etichetta} className="tessera px-4 py-5 text-center">
+            <Icona nome={n.icona} className="mx-auto mb-1.5 size-[18px] text-glicine-fondo/80" />
             <div className="numero text-[22px]" style={{ color: "#8b5ca8" }}>
               {n.valore}
             </div>
@@ -48,7 +50,10 @@ export default async function Pagina() {
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <div className="tessera px-5 py-5">
-          <h3 className="text-[15px] text-inchiostro-2">Ultime vendite</h3>
+          <h3 className="flex items-center gap-2 text-[15px] text-inchiostro-2">
+            <Icona nome="scontrino" className="size-4 text-glicine-fondo" />
+            Ultime vendite
+          </h3>
           {stat.ultimeVendite.length === 0 ? (
             <p className="mt-2 text-[13.5px] text-inchiostro-3">Ancora nessuna vendita registrata.</p>
           ) : (
@@ -67,7 +72,10 @@ export default async function Pagina() {
         </div>
 
         <div className="tessera px-5 py-5">
-          <h3 className="text-[15px] text-inchiostro-2">Ferme da più di 90 giorni</h3>
+          <h3 className="flex items-center gap-2 text-[15px] text-inchiostro-2">
+            <Icona nome="clessidra" className="size-4 text-glicine-fondo" />
+            Ferme da più di 90 giorni
+          </h3>
           {stat.ferme.length === 0 ? (
             <p className="mt-2 text-[13.5px] text-inchiostro-3">Niente di fermo da troppo tempo.</p>
           ) : (

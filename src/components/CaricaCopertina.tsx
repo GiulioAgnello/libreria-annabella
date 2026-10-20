@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Icona from "@/components/Icona";
 import { caricaCopertina, rimuoviCopertina } from "@/lib/azioni-copertina";
 
 /** Lato lungo massimo della copertina salvata: nitida in scheda, leggera negli elenchi. */
@@ -107,19 +108,7 @@ export default function CaricaCopertina({
           <Image src={url} alt="" width={88} height={132} unoptimized className="h-full w-full object-cover" />
         ) : (
           <span className="flex h-full flex-col items-center justify-center gap-1 px-2 text-center text-[11.5px] leading-tight text-inchiostro-3">
-            <svg
-              aria-hidden
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.7}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="size-[20px]"
-            >
-              <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
-              <circle cx="12" cy="13" r="3.5" />
-            </svg>
+            <Icona nome="fotocamera" className="size-[18px]" />
             Aggiungi copertina
           </span>
         )}
