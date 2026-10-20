@@ -65,7 +65,7 @@ const CAMPI_SINTESI =
 
 /** Catalogo: quello che si vede in griglia e in tabella, più i campi su cui si filtra. */
 const CAMPI_ELENCO =
-  "id, titolo, autori, copertina_url, stato_lettura, prezzo_pagato, risparmio, generi, editore";
+  "id, titolo, autori, copertina_url, stato_lettura, prezzo_pagato, risparmio, generi, editore, provenienza";
 
 /** Coda di lettura: numero, titolo, autore. */
 const CAMPI_CODA = "id, titolo, autori, posizione_coda";
@@ -96,6 +96,7 @@ export type LibroElenco = Pick<
   | "risparmio"
   | "generi"
   | "editore"
+  | "provenienza"
 >;
 
 export type LibroCoda = Pick<Libro, "id" | "titolo" | "autori" | "posizione_coda">;

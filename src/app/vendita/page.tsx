@@ -24,12 +24,32 @@ export default async function Pagina() {
   }
 
   const NUMERI = [
-    { valore: EURO(stat.utile), etichetta: "utile", icona: "grafico" },
-    { valore: EURO(stat.incassato), etichetta: "incassato", icona: "monete" },
-    { valore: `${stat.ricarico.toFixed(1)}×`, etichetta: "ricarico medio", icona: "percentuale" },
-    { valore: EURO(stat.valoreMagazzino), etichetta: "valore magazzino", icona: "portafoglio" },
-    { valore: EURO(stat.margineMedio), etichetta: "margine medio/copia", icona: "scontrino" },
-    { valore: String(stat.inMagazzino), etichetta: "copie in magazzino", icona: "magazzino" },
+    { valore: EURO(stat.utile), etichetta: "utile", href: "/vendita/contabilita", icona: "grafico" },
+    { valore: EURO(stat.incassato), etichetta: "incassato", href: "/vendita/vendite", icona: "monete" },
+    {
+      valore: `${stat.ricarico.toFixed(1)}×`,
+      etichetta: "ricarico medio",
+      href: "/vendita/contabilita",
+      icona: "percentuale",
+    },
+    {
+      valore: EURO(stat.valoreMagazzino),
+      etichetta: "valore magazzino",
+      href: "/vendita/magazzino",
+      icona: "portafoglio",
+    },
+    {
+      valore: EURO(stat.margineMedio),
+      etichetta: "margine medio/copia",
+      href: "/vendita/contabilita",
+      icona: "scontrino",
+    },
+    {
+      valore: String(stat.inMagazzino),
+      etichetta: "copie in magazzino",
+      href: "/vendita/magazzino",
+      icona: "magazzino",
+    },
   ];
 
   return (
@@ -38,13 +58,17 @@ export default async function Pagina() {
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
         {NUMERI.map((n) => (
-          <div key={n.etichetta} className="tessera px-4 py-5 text-center">
+          <Link
+            key={n.etichetta}
+            href={n.href}
+            className="tessera px-4 py-5 text-center transition hover:-translate-y-[2px] hover:border-inchiostro-3"
+          >
             <Icona nome={n.icona} className="mx-auto mb-1.5 size-[18px] text-glicine-fondo/80" />
             <div className="numero text-[22px]" style={{ color: "#8b5ca8" }}>
               {n.valore}
             </div>
             <div className="mt-0.5 text-[11px] leading-tight text-inchiostro-3">{n.etichetta}</div>
-          </div>
+          </Link>
         ))}
       </div>
 

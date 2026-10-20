@@ -228,6 +228,7 @@ export const ORDINI_CATALOGO = {
 export type FiltriCatalogo = {
   ricerca: string;
   stato: string;
+  provenienza: string;
   genere: string;
   editore: string;
   ordina: string;
@@ -236,6 +237,7 @@ export type FiltriCatalogo = {
 export const FILTRI_CATALOGO_VUOTI: FiltriCatalogo = {
   ricerca: "",
   stato: "",
+  provenienza: "",
   genere: "",
   editore: "",
   ordina: "titolo",
@@ -247,6 +249,7 @@ type RigaCatalogo = {
   editore: string | null;
   generi: string[];
   stato_lettura: string;
+  provenienza: string;
   prezzo_pagato: number | null;
   risparmio: number | null;
 };
@@ -255,6 +258,7 @@ export function filtraCatalogo<T extends RigaCatalogo>(righe: T[], f: FiltriCata
   const scelte = righe.filter(
     (l) =>
       (f.stato ? l.stato_lettura === f.stato : true) &&
+      (f.provenienza ? l.provenienza === f.provenienza : true) &&
       (f.editore ? l.editore === f.editore : true) &&
       (f.genere ? l.generi.includes(f.genere) : true) &&
       corrisponde(l, f.ricerca),
