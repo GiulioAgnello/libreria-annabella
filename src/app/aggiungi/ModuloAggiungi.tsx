@@ -73,8 +73,14 @@ const CAMPO =
   "w-full rounded-[9px] border border-tratto bg-superficie px-3 py-2.5 text-[14px] outline-none focus:border-bosco";
 const ETICHETTA = "mb-1 block text-[12.5px] text-inchiostro-2";
 
-export default function ModuloAggiungi({ chiaveGoogle }: { chiaveGoogle: string | null }) {
-  const [area, setArea] = useState<Area | null>(null);
+export default function ModuloAggiungi({
+  chiaveGoogle,
+  areaIniziale = null,
+}: {
+  chiaveGoogle: string | null;
+  areaIniziale?: Area | null;
+}) {
+  const [area, setArea] = useState<Area | null>(areaIniziale);
   const [fase, setFase] = useState<"isbn" | "cercando" | "scheda" | "salvato">("isbn");
   const [dati, setDati] = useState<Dati>(VUOTO);
   const [manuale, setManuale] = useState("");
@@ -223,10 +229,16 @@ export default function ModuloAggiungi({ chiaveGoogle }: { chiaveGoogle: string 
     return (
       <div>
         <p className="mb-3 text-[13px] text-inchiostro-3">
-          Per <span style={{ color: colore }}>{AREE[area].nome}</span> —{" "}
-          <button type="button" onClick={() => setArea(null)} className="underline hover:text-inchiostro-2">
-            cambia
-          </button>
+          Per <span style={{ color: colore }}>{AREE[area].nome}</span>
+          {/* Dentro un'area la scelta è già fatta dal menu: si cambia passando all'altra area. */}
+          {!areaIniziale && (
+            <>
+              {" "}—{" "}
+              <button type="button" onClick={() => setArea(null)} className="underline hover:text-inchiostro-2">
+                cambia
+              </button>
+            </>
+          )}
         </p>
 
         <ScannerISBN onRilevato={cercaIsbn} />

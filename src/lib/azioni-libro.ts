@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { clientServer, utenteCorrente } from "@/lib/supabase/server";
 
 export type LibroCompleto = {
@@ -131,7 +131,7 @@ export async function aggiornaLibro(id: string, area: "personale" | "vendita", f
   revalidatePath("/vendita/contabilita");
   revalidatePath("/vetrina");
 
-  redirect(`/libro/${id}?salvato=1`);
+  redirect(`/libro/${id}?salvato=1`, RedirectType.replace);
 }
 
 /**
@@ -155,7 +155,7 @@ export async function cancellaLibro(id: string, ritorno: string) {
   revalidatePath("/vendita/contabilita");
   revalidatePath("/vetrina");
 
-  redirect(ritorno);
+  redirect(ritorno, RedirectType.replace);
 }
 
 /**
@@ -218,5 +218,5 @@ export async function spostaLibro(id: string, verso: "personale" | "vendita") {
     "/vetrina",
   ].forEach((p) => revalidatePath(p));
 
-  redirect(`/libro/${id}?spostato=1`);
+  redirect(`/libro/${id}?spostato=1`, RedirectType.replace);
 }

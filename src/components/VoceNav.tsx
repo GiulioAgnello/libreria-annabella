@@ -22,7 +22,7 @@ export default function VoceNav({
   styleAttivo?: "sfondo" | "testo";
   children: React.ReactNode;
 }) {
-  const attiva = usePathname() === href;
+  const attiva = usePathname() === href.split("?")[0];
 
   return (
     <Link

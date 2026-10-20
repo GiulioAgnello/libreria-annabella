@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Marchio from "@/components/Marchio";
 import Sfondo from "@/components/Sfondo";
+import TornaAreaVendita from "@/components/TornaAreaVendita";
 import { clientPubblico } from "@/lib/supabase/pubblico";
 
 const EURO = (n: number | null) => (n == null ? "" : n.toLocaleString("it-IT", { style: "currency", currency: "EUR" }));
@@ -35,6 +36,7 @@ export default async function Vetrina() {
   return (
     <main className="mx-auto min-h-dvh max-w-[860px] px-4 py-8 md:px-8 md:py-12" data-area="vendita">
       <Sfondo forte />
+      <TornaAreaVendita />
 
       <header className="mb-8 text-center">
         <div className="mb-3 flex justify-center">

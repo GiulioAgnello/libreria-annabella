@@ -36,3 +36,8 @@ export const AREE: Record<
   },
 };
 
+
+/** Legge l'area da un parametro dell'indirizzo; null se manca o non è valida. */
+export function areaDaParametro(valore: string | undefined | null): Area | null {
+  return valore === "libreria" || valore === "vendita" ? valore : null;
+}
