@@ -1,22 +1,16 @@
 import { NextResponse } from "next/server";
-
-type DatiLibro = {
-  titolo?: string;
-  sottotitolo?: string;
-  autori?: string[];
-  editore?: string;
-  anno?: number;
-  lingua?: string;
-  pagine?: number;
-  generi?: string[];
-  copertinaUrl?: string;
-};
+import { daGoogle, unisci, type DatiLibro } from "@/lib/dati-libro";
 
 /** Oltre questo, meglio rispondere "non trovato" che far aspettare davanti alla fotocamera. */
 const ATTESA_MASSIMA = 6000;
 
 /**
  * Dato un ISBN, cerca i dati del libro su Google Books e OpenLibrary.
+ *
+ * NB: in produzione Google risponde 503 alle chiamate da Vercel, quindi qui di
+ * fatto lavora OpenLibrary. Google lo interroga il modulo di inserimento
+ * direttamente dal browser (`cercaGoogleDalBrowser` in `lib/dati-libro.ts`);
+ * la parte Google di questa rotta resta per il giorno in cui torni a funzionare.
  *
  * Le due fonti vengono interrogate **in parallelo** e i risultati uniti, dando la
  * precedenza a Google (copertura migliore sui libri italiani) e riempiendo i buchi
@@ -69,27 +63,6 @@ export async function GET(richiesta: Request) {
   }
 
   return NextResponse.json({ trovato: true, isbn, ...unito, ...fonti });
-}
-
-/** Google per primo, OpenLibrary a tappare i buchi campo per campo. */
-function unisci(primario: DatiLibro | null, secondario: DatiLibro | null): DatiLibro | null {
-  if (!primario) return secondario;
-  if (!secondario) return primario;
-
-  const pieno = <T,>(v: T | undefined): v is T =>
-    v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0);
-
-  return {
-    titolo: pieno(primario.titolo) ? primario.titolo : secondario.titolo,
-    sottotitolo: pieno(primario.sottotitolo) ? primario.sottotitolo : secondario.sottotitolo,
-    autori: pieno(primario.autori) ? primario.autori : secondario.autori,
-    editore: pieno(primario.editore) ? primario.editore : secondario.editore,
-    anno: pieno(primario.anno) ? primario.anno : secondario.anno,
-    lingua: pieno(primario.lingua) ? primario.lingua : secondario.lingua,
-    pagine: pieno(primario.pagine) ? primario.pagine : secondario.pagine,
-    generi: pieno(primario.generi) ? primario.generi : secondario.generi,
-    copertinaUrl: pieno(primario.copertinaUrl) ? primario.copertinaUrl : secondario.copertinaUrl,
-  };
 }
 
 /** Risultato di una fonte: i dati, oppure il motivo per cui non ce ne sono. */
@@ -162,19 +135,8 @@ async function cercaGoogleBooks(isbn: string): Promise<Esito> {
   const info = corpo?.items?.[0]?.volumeInfo;
   if (!info?.title) return { dati: null, motivo: "ISBN non presente nel catalogo" };
 
-  const anno = info.publishedDate ? parseInt(String(info.publishedDate).slice(0, 4), 10) : NaN;
 
-  const dati: DatiLibro = {
-    titolo: info.title,
-    sottotitolo: info.subtitle,
-    autori: info.authors ?? [],
-    editore: info.publisher,
-    anno: Number.isFinite(anno) ? anno : undefined,
-    lingua: info.language,
-    pagine: info.pageCount,
-    generi: info.categories ?? [],
-    copertinaUrl: info.imageLinks?.thumbnail?.replace("http://", "https://"),
-  };
+  const dati = daGoogle(info);
   return { dati, motivo: "ha risposto" };
 }
 
