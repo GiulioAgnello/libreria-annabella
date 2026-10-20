@@ -3,7 +3,7 @@ import CaricaCopertina from "@/components/CaricaCopertina";
 import PaginaSemplice from "@/components/PaginaSemplice";
 import BottoneElimina from "@/components/BottoneElimina";
 import BottoneIndietro from "@/components/BottoneIndietro";
-import { dettaglioLibro, aggiornaLibro, cancellaLibro } from "@/lib/azioni-libro";
+import { dettaglioLibro, aggiornaLibro, cancellaLibro, spostaLibro } from "@/lib/azioni-libro";
 
 const CAMPO =
   "w-full rounded-[9px] border border-tratto bg-superficie px-3 py-2.5 text-[14px] outline-none focus:border-bosco";
@@ -14,10 +14,10 @@ export default async function Pagina({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ salvato?: string }>;
+  searchParams: Promise<{ salvato?: string; spostato?: string }>;
 }) {
   const { id } = await params;
-  const { salvato } = await searchParams;
+  const { salvato, spostato } = await searchParams;
   const libro = await dettaglioLibro(id);
 
   if (!libro) redirect("/");
@@ -37,6 +37,11 @@ export default async function Pagina({
   const salvaLibro = aggiornaLibro.bind(null, id, libro.area);
   const eliminaLibro = cancellaLibro.bind(null, id, torna);
 
+  const destinazione = libro.area === "personale" ? "vendita" : "personale";
+  const nomeDestinazione = destinazione === "vendita" ? "Compravendita" : "La mia libreria";
+  const coloreDestinazione = destinazione === "vendita" ? "#8b5ca8" : "#3f5e4e";
+  const sposta = spostaLibro.bind(null, id, destinazione);
+
   return (
     <PaginaSemplice titolo={libro.titolo} sottotitolo="Modifica le caratteristiche di questa copia.">
       <div className="mb-4 flex flex-wrap items-center gap-2.5">
@@ -45,6 +50,12 @@ export default async function Pagina({
         </span>
         <BottoneIndietro href={torna} testo="Torna all'elenco" />
       </div>
+
+      {spostato && (
+        <p className="tessera mb-4 px-4 py-3 text-[13px] text-bosco">
+          Spostato in {libro.area === "personale" ? "La mia libreria (in fondo alla coda)" : "Compravendita (in magazzino)"}.
+        </p>
+      )}
 
       {salvato && (
         <p className="tessera mb-4 px-4 py-3 text-[13px] text-bosco">Modifiche salvate.</p>
@@ -260,6 +271,29 @@ export default async function Pagina({
       </form>
 
       <div className="mt-8 border-t border-tratto pt-5">
+        {libro.stato === "venduta" ? (
+          <p className="text-[12.5px] text-inchiostro-3">
+            Questa copia è venduta: per spostarla in libreria rimetti prima lo stato su &quot;In magazzino&quot;.
+          </p>
+        ) : (
+          <form action={sposta} className="flex flex-wrap items-center gap-3">
+            <button
+              type="submit"
+              className="rounded-[9px] border px-4 py-2.5 text-[13.5px] transition hover:bg-superficie"
+              style={{ borderColor: coloreDestinazione, color: coloreDestinazione }}
+            >
+              Sposta in {nomeDestinazione}
+            </button>
+            <span className="text-[12.5px] text-inchiostro-3">
+              {destinazione === "vendita"
+                ? "Lo tieni con tutti i dati: entra in magazzino, da mettere in vetrina quando vuoi."
+                : "Lo tieni con tutti i dati: finisce in fondo alla coda di lettura."}
+            </span>
+          </form>
+        )}
+      </div>
+
+      <div className="mt-5 border-t border-tratto pt-5">
         <form action={eliminaLibro}>
           <BottoneElimina titolo={libro.titolo} />
         </form>

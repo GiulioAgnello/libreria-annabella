@@ -101,8 +101,10 @@ export default async function Pagina() {
             <ul className="mt-3 space-y-2">
               {stat.inCorso.map((l) => (
                 <li key={l.id} className="text-[14px]">
-                  {l.titolo}
-                  {l.autori[0] && <span className="text-inchiostro-3"> — {l.autori[0]}</span>}
+                  <Link href={`/libro/${l.id}`} className="hover:underline">
+                    {l.titolo}
+                    {l.autori[0] && <span className="text-inchiostro-3"> — {l.autori[0]}</span>}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -113,10 +115,10 @@ export default async function Pagina() {
           <h3 className="text-[15px] text-inchiostro-2">Prossimo in coda</h3>
           {stat.prossimo ? (
             <>
-              <p className="mt-2 text-[14px]">
+              <Link href={`/libro/${stat.prossimo.id}`} className="mt-2 block text-[14px] hover:underline">
                 {stat.prossimo.titolo}
                 {stat.prossimo.autori[0] && <span className="text-inchiostro-3"> — {stat.prossimo.autori[0]}</span>}
-              </p>
+              </Link>
               <Link href="/libreria/da-leggere" className="mt-3 inline-block text-[12.5px] underline text-inchiostro-2">
                 Vedi tutta la coda →
               </Link>
