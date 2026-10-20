@@ -31,12 +31,27 @@ export default async function Pagina() {
   }
 
   const NUMERI = [
-    { valore: stat.totale, etichetta: "in collezione", icona: "collezione" },
-    { valore: stat.daLeggere, etichetta: "da leggere", icona: "da-leggere" },
-    { valore: stat.inLettura, etichetta: "in lettura", icona: "in-lettura" },
-    { valore: stat.letti, etichetta: "letti", icona: "letto" },
-    { valore: stat.prestiti, etichetta: "in prestito", icona: "biblioteca" },
-    { valore: stat.audiolibri, etichetta: "audiolibri", icona: "audiolibro" },
+    { valore: stat.totale, etichetta: "in collezione", icona: "collezione", href: "/libreria/catalogo" },
+    { valore: stat.daLeggere, etichetta: "da leggere", icona: "da-leggere", href: "/libreria/da-leggere" },
+    {
+      valore: stat.inLettura,
+      etichetta: "in lettura",
+      icona: "in-lettura",
+      href: "/libreria/catalogo?stato=in%20lettura",
+    },
+    { valore: stat.letti, etichetta: "letti", icona: "letto", href: "/libreria/catalogo?stato=letto" },
+    {
+      valore: stat.prestiti,
+      etichetta: "in prestito",
+      icona: "biblioteca",
+      href: "/libreria/catalogo?provenienza=biblioteca",
+    },
+    {
+      valore: stat.audiolibri,
+      etichetta: "audiolibri",
+      icona: "audiolibro",
+      href: "/libreria/catalogo?provenienza=audible",
+    },
   ];
 
   return (
@@ -76,9 +91,7 @@ export default async function Pagina() {
           </div>
           <div className="border-t border-tratto pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
             <div className="text-[12px] text-inchiostro-3">Saldo</div>
-            <div className={`numero text-[24px] ${saldo >= 0 ? "text-bosco" : "text-vermiglio"}`}>
-              {EURO(saldo)}
-            </div>
+            <div className={`numero text-[24px] ${saldo >= 0 ? "text-bosco" : "text-vermiglio"}`}>{EURO(saldo)}</div>
           </div>
         </div>
 
@@ -91,11 +104,15 @@ export default async function Pagina() {
 
       <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-6">
         {NUMERI.map((n) => (
-          <div key={n.etichetta} className="tessera px-3 py-4 text-center">
+          <Link
+            key={n.etichetta}
+            href={n.href}
+            className="tessera px-3 py-4 text-center transition hover:-translate-y-[2px] hover:border-inchiostro-3"
+          >
             <Icona nome={n.icona} className="mx-auto mb-1.5 size-[18px] text-bosco/80" />
             <div className="numero text-[22px]">{n.valore}</div>
             <div className="mt-0.5 text-[11px] leading-tight text-inchiostro-3">{n.etichetta}</div>
-          </div>
+          </Link>
         ))}
       </div>
 

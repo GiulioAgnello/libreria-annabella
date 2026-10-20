@@ -22,8 +22,26 @@ const STATI = ["da leggere", "in lettura", "letto", "abbandonato"] as const;
 const EURO = (n: number | null) => (n == null ? "—" : n.toLocaleString("it-IT", { style: "currency", currency: "EUR" }));
 const BOSCO = "#3f5e4e";
 
-export default function ElencoCatalogo({ righe }: { righe: LibroElenco[] }) {
-  const [filtri, setFiltri] = useState(FILTRI_CATALOGO_VUOTI);
+const PROVENIENZE: Record<string, string> = {
+  acquisto: "acquistati",
+  biblioteca: "in prestito (biblioteca)",
+  audible: "audiolibri (Audible)",
+  regalo: "regalati",
+};
+
+/**
+ * `iniziali` arriva dall'indirizzo: le tessere del cruscotto aprono il catalogo
+ * già filtrato (`?stato=letto`, `?provenienza=biblioteca`…). Da lì in poi i
+ * filtri si cambiano liberamente, come sempre.
+ */
+export default function ElencoCatalogo({
+  righe,
+  iniziali,
+}: {
+  righe: LibroElenco[];
+  iniziali?: Partial<typeof FILTRI_CATALOGO_VUOTI>;
+}) {
+  const [filtri, setFiltri] = useState({ ...FILTRI_CATALOGO_VUOTI, ...iniziali });
   const [aCatalogo, setACatalogo] = useState(false);
   const ricercaPigra = useDeferredValue(filtri.ricerca);
 
@@ -63,6 +81,15 @@ export default function ElencoCatalogo({ righe }: { righe: LibroElenco[] }) {
             {STATI.map((s) => (
               <option key={s} value={s}>
                 {s}
+              </option>
+            ))}
+          </select>
+
+          <select value={filtri.provenienza} onChange={cambia("provenienza")} className={CONTROLLO}>
+            <option value="">Tutte le provenienze</option>
+            {Object.entries(PROVENIENZE).map(([valore, etichetta]) => (
+              <option key={valore} value={valore}>
+                {etichetta}
               </option>
             ))}
           </select>
